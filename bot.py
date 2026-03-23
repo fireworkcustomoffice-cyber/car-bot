@@ -1,18 +1,7 @@
 import os
 import logging
-from telegram import Update
-from telegram.ext import Application, MessageHandler, filters, ContextTypes
-from groq import Groq
-
-logging.basicConfig(level=logging.INFO)
-
-TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
-GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
-
-import os
-import logging
 from telegram import Update, ReplyKeyboardMarkup, KeyboardButton
-from telegram.ext import Application, MessageHandler, CommandHandler, filters, ContextTypes
+from telegram.ext import Application, MessageHandler, CommandHandler, filters, ContextTypes, ConversationHandler
 from groq import Groq
 
 logging.basicConfig(level=logging.INFO)
@@ -20,7 +9,7 @@ logging.basicConfig(level=logging.INFO)
 TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
 
-SYSTEM_PROMPT = """Ты — консультант компании CARFIRE по пригону автомобилей из-за рубежа. Общаешься дружелюбно и неформально.
+SYSTEM_PROMPT = """Ты — AI-ассистент компании CARFIRE по пригону автомобилей из-за рубежа. Тебя зовут Игорь. Общаешься дружелюбно и неформально.
 
 О компании:
 - Название: CARFIRE
@@ -29,52 +18,91 @@ SYSTEM_PROMPT = """Ты — консультант компании CARFIRE по
 - Комиссия за услуги: 90 000 рублей (включает полное сопровождение сделки)
 
 Твоя задача:
-1. Отвечать на вопросы клиентов про пригон авто — стоимость, сроки, документы, растаможка
-2. Помогать выбрать страну под запрос клиента
-3. Когда клиент готов к покупке или хочет точный расчёт — передавать его менеджеру
+1. Помогать клиенту прицениться — объяснять из каких стран везём, примерные сроки и условия
+2. Отвечать на вопросы про пригон авто — стоимость, сроки, документы, растаможка
+3. Когда клиент готов к покупке или хочет точный расчёт — передавать его менеджеру Евгению
 
 Как передавать менеджеру:
-Напиши: "Для точного расчёта и подбора авто свяжись с нашим менеджером Максом: @superluxxx в Telegram"
+Напиши: "Передаю тебя нашему менеджеру Евгению, он сделает точный расчёт и подберёт авто под тебя: @superluxxx в Telegram"
 
 Правила:
+- Ты AI-ассистент, не скрывай это — если спросят, честно скажи что ты искусственный интеллект
 - Отвечай коротко, максимум 4-5 предложений
 - Говори только про направления которые реально везём
 - Если не знаешь точного ответа — честно скажи и предложи связаться с менеджером
-- Никогда не называй точную итоговую стоимость — говори что финальный расчёт делает менеджер
+- Никогда не называй точную итоговую стоимость — говори что финальный расчёт делает менеджер Евгений
 - Общайся на русском языке"""
 
 client = Groq(api_key=GROQ_API_KEY)
 user_histories = {}
+user_data = {}
+
+GET_NAME, GET_PHONE, CHAT = range(3)
 
 def get_keyboard():
     keyboard = [
-        [KeyboardButton("🚗 Подобрать авто"), KeyboardButton("💰 Узнать стоимость")],
+        [KeyboardButton("🚗 Подобрать авто"), KeyboardButton("💰 Прицениться")],
         [KeyboardButton("🌍 Из каких стран везёте?"), KeyboardButton("📞 Связаться с менеджером")],
     ]
     return ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_name = update.effective_user.first_name
     await update.message.reply_text(
-        f"Привет, {user_name}! 👋\n\n"
-        f"Я бот компании CARFIRE 🔥\n"
-        f"Помогаю с пригоном авто из Китая, США и других стран.\n\n"
-        f"Что тебя интересует?",
+        "Привет! 👋\n\n"
+        "Я Игорь — AI-ассистент компании CARFIRE 🔥\n\n"
+        "Я не просто бот — я искусственный интеллект, который поможет тебе разобраться в пригоне авто из-за рубежа, прицениться и ответить на все вопросы.\n\n"
+        "Прежде чем начать — как тебя зовут?"
+    )
+    return GET_NAME
+
+async def get_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    user_data[user_id] = {"name": update.message.text}
+    name = update.message.text
+    await update.message.reply_text(
+        f"Приятно познакомиться, {name}! 🤝\n\n"
+        f"Оставь свой номер телефона или Telegram — чтобы менеджер мог с тобой связаться если понадобится.",
+        reply_markup=ReplyKeyboardMarkup(
+            [[KeyboardButton("📱 Отправить номер", request_contact=True)],
+             [KeyboardButton("Пропустить")]],
+            resize_keyboard=True
+        )
+    )
+    return GET_PHONE
+
+async def get_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    name = user_data.get(user_id, {}).get("name", "")
+
+    if update.message.contact:
+        phone = update.message.contact.phone_number
+        user_data[user_id]["phone"] = phone
+        logging.info(f"Новый клиент: {name}, тел: {phone}, tg_id: {user_id}")
+    else:
+        user_data[user_id]["phone"] = "не указан"
+        logging.info(f"Новый клиент: {name}, tg_id: {user_id}, телефон не указан")
+
+    await update.message.reply_text(
+        f"Отлично, {name}! Теперь я готов помочь 🚀\n\n"
+        f"Спрашивай всё что интересует — из каких стран везём, сколько стоит, какие сроки, как работает растаможка. "
+        f"Если захочешь точный расчёт — передам тебя менеджеру Евгению.",
         reply_markup=get_keyboard()
     )
+    return CHAT
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     user_text = update.message.text
+    name = user_data.get(user_id, {}).get("name", "")
 
     if user_text == "📞 Связаться с менеджером":
         await update.message.reply_text(
-            "Наш менеджер Макс готов помочь! 💪\n\n"
-            "Telegram: @superluxxx\n\n"
-            "Напиши ему — он подберёт авто и сделает точный расчёт под тебя.",
+            "Передаю тебя менеджеру Евгению! 💪\n\n"
+            "Он сделает точный расчёт и подберёт авто под тебя.\n\n"
+            "Telegram: @superluxxx",
             reply_markup=get_keyboard()
         )
-        return
+        return CHAT
 
     if user_id not in user_histories:
         user_histories[user_id] = []
@@ -85,9 +113,13 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         user_histories[user_id] = user_histories[user_id][-20:]
 
     try:
+        system = SYSTEM_PROMPT
+        if name:
+            system += f"\n\nКлиента зовут {name}. Обращайся к нему по имени иногда."
+
         response = client.chat.completions.create(
             model="llama-3.3-70b-versatile",
-            messages=[{"role": "system", "content": SYSTEM_PROMPT}] + user_histories[user_id],
+            messages=[{"role": "system", "content": system}] + user_histories[user_id],
             max_tokens=500,
         )
         reply = response.choices[0].message.content
@@ -98,44 +130,24 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         logging.error(f"Ошибка: {e}")
         await update.message.reply_text("Что-то пошло не так, попробуй ещё раз.", reply_markup=get_keyboard())
 
-if __name__ == "__main__":
-    app = Application.builder().token(TELEGRAM_TOKEN).build()
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
-    print("Бот запущен!")
-    app.run_polling()
-
-client = Groq(api_key=GROQ_API_KEY)
-user_histories = {}
-
-async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_id = update.effective_user.id
-    user_text = update.message.text
-
-    if user_id not in user_histories:
-        user_histories[user_id] = []
-
-    user_histories[user_id].append({"role": "user", "content": user_text})
-
-    if len(user_histories[user_id]) > 20:
-        user_histories[user_id] = user_histories[user_id][-20:]
-
-    try:
-        response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
-            messages=[{"role": "system", "content": SYSTEM_PROMPT}] + user_histories[user_id],
-            max_tokens=500,
-        )
-        reply = response.choices[0].message.content
-        user_histories[user_id].append({"role": "assistant", "content": reply})
-        await update.message.reply_text(reply)
-
-    except Exception as e:
-        logging.error(f"Ошибка: {e}")
-        await update.message.reply_text("Что-то пошло не так, попробуй ещё раз.")
+    return CHAT
 
 if __name__ == "__main__":
     app = Application.builder().token(TELEGRAM_TOKEN).build()
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+
+    conv_handler = ConversationHandler(
+        entry_points=[CommandHandler("start", start)],
+        states={
+            GET_NAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, get_name)],
+            GET_PHONE: [
+                MessageHandler(filters.CONTACT, get_phone),
+                MessageHandler(filters.TEXT & ~filters.COMMAND, get_phone),
+            ],
+            CHAT: [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message)],
+        },
+        fallbacks=[CommandHandler("start", start)],
+    )
+
+    app.add_handler(conv_handler)
     print("Бот запущен!")
     app.run_polling()
