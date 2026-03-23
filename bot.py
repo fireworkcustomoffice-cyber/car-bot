@@ -9,7 +9,7 @@ logging.basicConfig(level=logging.INFO)
 TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
 
-SYSTEM_PROMPT = """Ты — AI-ассистент компании CARFIRE по пригону автомобилей из-за рубежа. Тебя зовут Игорь. Общаешься дружелюбно и неформально.
+SYSTEM_PROMPT = """Ты — AI-ассистент компании CARFIRE по пригону автомобилей из-за рубежа. Тебя зовут Игорь.
 
 О компании:
 - Название: CARFIRE
@@ -27,6 +27,7 @@ SYSTEM_PROMPT = """Ты — AI-ассистент компании CARFIRE по 
 
 Правила:
 - Ты AI-ассистент, не скрывай это — если спросят, честно скажи что ты искусственный интеллект
+- Не здоровайся повторно если уже общался с клиентом в этом диалоге — просто продолжай разговор
 - Отвечай коротко, максимум 4-5 предложений
 - Говори только про направления которые реально везём
 - Если не знаешь точного ответа — честно скажи и предложи связаться с менеджером
@@ -50,8 +51,9 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         "Привет! 👋\n\n"
         "Я Игорь — AI-ассистент компании CARFIRE 🔥\n\n"
-        "Я не просто бот — я искусственный интеллект, который поможет тебе разобраться в пригоне авто из-за рубежа, прицениться и ответить на все вопросы.\n\n"
-        "Прежде чем начать — как тебя зовут?"
+        "Я не просто бот — я искусственный интеллект, который поможет разобраться в пригоне авто из-за рубежа, прицениться и ответить на все вопросы.\n\n"
+        "Прежде чем начать — как тебя зовут?",
+        reply_markup=ReplyKeyboardMarkup([[]], resize_keyboard=True)
     )
     return GET_NAME
 
@@ -61,10 +63,10 @@ async def get_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     name = update.message.text
     await update.message.reply_text(
         f"Приятно познакомиться, {name}! 🤝\n\n"
-        f"Оставь свой номер телефона или Telegram — чтобы менеджер мог с тобой связаться если понадобится.",
+        f"Оставь свой номер телефона — чтобы менеджер мог с тобой связаться когда будет нужно. "
+        f"Никакого спама, только по делу 🙂",
         reply_markup=ReplyKeyboardMarkup(
-            [[KeyboardButton("📱 Отправить номер", request_contact=True)],
-             [KeyboardButton("Пропустить")]],
+            [[KeyboardButton("📱 Отправить номер", request_contact=True)]],
             resize_keyboard=True
         )
     )
@@ -78,17 +80,26 @@ async def get_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
         phone = update.message.contact.phone_number
         user_data[user_id]["phone"] = phone
         logging.info(f"Новый клиент: {name}, тел: {phone}, tg_id: {user_id}")
+        await update.message.reply_text(
+            f"Отлично, {name}! Теперь я готов помочь 🚀\n\n"
+            f"Спрашивай всё что интересует — из каких стран везём, сколько стоит, "
+            f"какие сроки, как работает растаможка. "
+            f"Если захочешь точный расчёт — передам тебя менеджеру Евгению.",
+            reply_markup=get_keyboard()
+        )
+        return CHAT
     else:
-        user_data[user_id]["phone"] = "не указан"
-        logging.info(f"Новый клиент: {name}, tg_id: {user_id}, телефон не указан")
-
-    await update.message.reply_text(
-        f"Отлично, {name}! Теперь я готов помочь 🚀\n\n"
-        f"Спрашивай всё что интересует — из каких стран везём, сколько стоит, какие сроки, как работает растаможка. "
-        f"Если захочешь точный расчёт — передам тебя менеджеру Евгению.",
-        reply_markup=get_keyboard()
-    )
-    return CHAT
+        await update.message.reply_text(
+            f"{name}, всё понимаю 🙂\n\n"
+            f"Номер нужен только для того, чтобы менеджер мог связаться с тобой когда будешь готов. "
+            f"Без него я не смогу полноценно помочь с подбором и расчётом.\n\n"
+            f"Нажми кнопку ниже — это займёт секунду 👇",
+            reply_markup=ReplyKeyboardMarkup(
+                [[KeyboardButton("📱 Отправить номер", request_contact=True)]],
+                resize_keyboard=True
+            )
+        )
+        return GET_PHONE
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
