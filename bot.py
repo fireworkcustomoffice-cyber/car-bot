@@ -68,9 +68,7 @@ CARS_DATABASE: List[Dict[str, Any]] = [
      "url": "https://che168.com", "comment": "Премиальный гибрид."},
 ]
 
-# Словарь популярных авто — все варианты написания рус/англ
 KNOWN_CARS: Dict[str, Dict] = {
-    # Audi
     "audi a1": {"brand": "Audi", "model": "A1", "engine_cc": 1000, "power_hp": 116, "price_usd": 18000},
     "audi a3": {"brand": "Audi", "model": "A3", "engine_cc": 1400, "power_hp": 150, "price_usd": 27000},
     "ауди а3": {"brand": "Audi", "model": "A3", "engine_cc": 1400, "power_hp": 150, "price_usd": 27000},
@@ -96,7 +94,6 @@ KNOWN_CARS: Dict[str, Dict] = {
     "audi q7": {"brand": "Audi", "model": "Q7", "engine_cc": 3000, "power_hp": 249, "price_usd": 70000},
     "ауди q7": {"brand": "Audi", "model": "Q7", "engine_cc": 3000, "power_hp": 249, "price_usd": 70000},
     "audi q8": {"brand": "Audi", "model": "Q8", "engine_cc": 3000, "power_hp": 340, "price_usd": 90000},
-    # BMW
     "bmw 1": {"brand": "BMW", "model": "1 Series", "engine_cc": 1500, "power_hp": 140, "price_usd": 22000},
     "бмв 1": {"brand": "BMW", "model": "1 Series", "engine_cc": 1500, "power_hp": 140, "price_usd": 22000},
     "bmw 3": {"brand": "BMW", "model": "3 Series", "engine_cc": 2000, "power_hp": 184, "price_usd": 35000},
@@ -115,7 +112,6 @@ KNOWN_CARS: Dict[str, Dict] = {
     "бмв х6": {"brand": "BMW", "model": "X6", "engine_cc": 3000, "power_hp": 249, "price_usd": 65000},
     "bmw x7": {"brand": "BMW", "model": "X7", "engine_cc": 3000, "power_hp": 340, "price_usd": 90000},
     "бмв х7": {"brand": "BMW", "model": "X7", "engine_cc": 3000, "power_hp": 340, "price_usd": 90000},
-    # Mercedes
     "mercedes a": {"brand": "Mercedes", "model": "A-Class", "engine_cc": 1300, "power_hp": 136, "price_usd": 25000},
     "мерседес а": {"brand": "Mercedes", "model": "A-Class", "engine_cc": 1300, "power_hp": 136, "price_usd": 25000},
     "mercedes c": {"brand": "Mercedes", "model": "C-Class", "engine_cc": 1500, "power_hp": 170, "price_usd": 38000},
@@ -132,7 +128,6 @@ KNOWN_CARS: Dict[str, Dict] = {
     "mercedes gls": {"brand": "Mercedes", "model": "GLS", "engine_cc": 3000, "power_hp": 330, "price_usd": 95000},
     "mercedes g": {"brand": "Mercedes", "model": "G-Class", "engine_cc": 4000, "power_hp": 422, "price_usd": 130000},
     "гелендваген": {"brand": "Mercedes", "model": "G-Class", "engine_cc": 4000, "power_hp": 422, "price_usd": 130000},
-    # Toyota
     "toyota camry": {"brand": "Toyota", "model": "Camry", "engine_cc": 2000, "power_hp": 173, "price_usd": 22000},
     "camry": {"brand": "Toyota", "model": "Camry", "engine_cc": 2000, "power_hp": 173, "price_usd": 22000},
     "камри": {"brand": "Toyota", "model": "Camry", "engine_cc": 2000, "power_hp": 173, "price_usd": 22000},
@@ -149,7 +144,6 @@ KNOWN_CARS: Dict[str, Dict] = {
     "toyota corolla": {"brand": "Toyota", "model": "Corolla", "engine_cc": 1600, "power_hp": 122, "price_usd": 18000},
     "corolla": {"brand": "Toyota", "model": "Corolla", "engine_cc": 1600, "power_hp": 122, "price_usd": 18000},
     "королла": {"brand": "Toyota", "model": "Corolla", "engine_cc": 1600, "power_hp": 122, "price_usd": 18000},
-    # Lexus
     "lexus rx": {"brand": "Lexus", "model": "RX", "engine_cc": 2000, "power_hp": 238, "price_usd": 45000},
     "лексус rx": {"brand": "Lexus", "model": "RX", "engine_cc": 2000, "power_hp": 238, "price_usd": 45000},
     "лексус рх": {"brand": "Lexus", "model": "RX", "engine_cc": 2000, "power_hp": 238, "price_usd": 45000},
@@ -158,7 +152,6 @@ KNOWN_CARS: Dict[str, Dict] = {
     "lexus es": {"brand": "Lexus", "model": "ES", "engine_cc": 2500, "power_hp": 218, "price_usd": 35000},
     "лексус es": {"brand": "Lexus", "model": "ES", "engine_cc": 2500, "power_hp": 218, "price_usd": 35000},
     "lexus gx": {"brand": "Lexus", "model": "GX", "engine_cc": 4000, "power_hp": 296, "price_usd": 60000},
-    # Volkswagen
     "volkswagen passat": {"brand": "Volkswagen", "model": "Passat", "engine_cc": 2000, "power_hp": 150, "price_usd": 25000},
     "пассат": {"brand": "Volkswagen", "model": "Passat", "engine_cc": 2000, "power_hp": 150, "price_usd": 25000},
     "volkswagen tiguan": {"brand": "Volkswagen", "model": "Tiguan", "engine_cc": 1400, "power_hp": 150, "price_usd": 28000},
@@ -169,7 +162,6 @@ KNOWN_CARS: Dict[str, Dict] = {
     "поло": {"brand": "Volkswagen", "model": "Polo", "engine_cc": 1000, "power_hp": 110, "price_usd": 16000},
     "volkswagen touareg": {"brand": "Volkswagen", "model": "Touareg", "engine_cc": 3000, "power_hp": 249, "price_usd": 55000},
     "туарег": {"brand": "Volkswagen", "model": "Touareg", "engine_cc": 3000, "power_hp": 249, "price_usd": 55000},
-    # Hyundai
     "hyundai tucson": {"brand": "Hyundai", "model": "Tucson", "engine_cc": 1600, "power_hp": 150, "price_usd": 22000},
     "туксон": {"brand": "Hyundai", "model": "Tucson", "engine_cc": 1600, "power_hp": 150, "price_usd": 22000},
     "hyundai palisade": {"brand": "Hyundai", "model": "Palisade", "engine_cc": 2500, "power_hp": 196, "price_usd": 38000},
@@ -178,7 +170,6 @@ KNOWN_CARS: Dict[str, Dict] = {
     "санта фе": {"brand": "Hyundai", "model": "Santa Fe", "engine_cc": 2000, "power_hp": 180, "price_usd": 30000},
     "hyundai sonata": {"brand": "Hyundai", "model": "Sonata", "engine_cc": 2000, "power_hp": 150, "price_usd": 22000},
     "соната": {"brand": "Hyundai", "model": "Sonata", "engine_cc": 2000, "power_hp": 150, "price_usd": 22000},
-    # Kia
     "kia sportage": {"brand": "Kia", "model": "Sportage", "engine_cc": 1600, "power_hp": 150, "price_usd": 22000},
     "спортейдж": {"brand": "Kia", "model": "Sportage", "engine_cc": 1600, "power_hp": 150, "price_usd": 22000},
     "kia sorento": {"brand": "Kia", "model": "Sorento", "engine_cc": 2500, "power_hp": 196, "price_usd": 35000},
@@ -187,7 +178,6 @@ KNOWN_CARS: Dict[str, Dict] = {
     "стингер": {"brand": "Kia", "model": "Stinger", "engine_cc": 2000, "power_hp": 255, "price_usd": 30000},
     "kia k5": {"brand": "Kia", "model": "K5", "engine_cc": 1600, "power_hp": 180, "price_usd": 22000},
     "kia telluride": {"brand": "Kia", "model": "Telluride", "engine_cc": 3500, "power_hp": 291, "price_usd": 40000},
-    # Mazda
     "mazda cx-5": {"brand": "Mazda", "model": "CX-5", "engine_cc": 1500, "power_hp": 155, "price_usd": 18000},
     "мазда cx-5": {"brand": "Mazda", "model": "CX-5", "engine_cc": 1500, "power_hp": 155, "price_usd": 18000},
     "mazda cx5": {"brand": "Mazda", "model": "CX-5", "engine_cc": 1500, "power_hp": 155, "price_usd": 18000},
@@ -196,7 +186,6 @@ KNOWN_CARS: Dict[str, Dict] = {
     "mazda 6": {"brand": "Mazda", "model": "6", "engine_cc": 2000, "power_hp": 165, "price_usd": 20000},
     "мазда 6": {"brand": "Mazda", "model": "6", "engine_cc": 2000, "power_hp": 165, "price_usd": 20000},
     "мазда": {"brand": "Mazda", "model": "CX-5", "engine_cc": 1500, "power_hp": 155, "price_usd": 18000},
-    # Chinese brands
     "haval h6": {"brand": "Haval", "model": "H6", "engine_cc": 1500, "power_hp": 150, "price_usd": 15000},
     "haval h9": {"brand": "Haval", "model": "H9", "engine_cc": 2000, "power_hp": 218, "price_usd": 28000},
     "geely atlas": {"brand": "Geely", "model": "Atlas", "engine_cc": 1500, "power_hp": 150, "price_usd": 14000},
@@ -208,46 +197,38 @@ KNOWN_CARS: Dict[str, Dict] = {
     "exeed": {"brand": "Exeed", "model": "TXL", "engine_cc": 1500, "power_hp": 150, "price_usd": 16000},
     "omoda": {"brand": "Omoda", "model": "C5", "engine_cc": 1600, "power_hp": 147, "price_usd": 15000},
     "jaecoo": {"brand": "Jaecoo", "model": "J7", "engine_cc": 1500, "power_hp": 147, "price_usd": 16000},
-    # Porsche
     "porsche cayenne": {"brand": "Porsche", "model": "Cayenne", "engine_cc": 3000, "power_hp": 340, "price_usd": 85000},
     "кайен": {"brand": "Porsche", "model": "Cayenne", "engine_cc": 3000, "power_hp": 340, "price_usd": 85000},
     "порше кайен": {"brand": "Porsche", "model": "Cayenne", "engine_cc": 3000, "power_hp": 340, "price_usd": 85000},
     "porsche macan": {"brand": "Porsche", "model": "Macan", "engine_cc": 2000, "power_hp": 265, "price_usd": 60000},
     "макан": {"brand": "Porsche", "model": "Macan", "engine_cc": 2000, "power_hp": 265, "price_usd": 60000},
     "porsche panamera": {"brand": "Porsche", "model": "Panamera", "engine_cc": 3000, "power_hp": 330, "price_usd": 90000},
-    # Land Rover
     "range rover": {"brand": "Land Rover", "model": "Range Rover", "engine_cc": 3000, "power_hp": 350, "price_usd": 90000},
     "рейндж ровер": {"brand": "Land Rover", "model": "Range Rover", "engine_cc": 3000, "power_hp": 350, "price_usd": 90000},
     "range rover sport": {"brand": "Land Rover", "model": "Range Rover Sport", "engine_cc": 3000, "power_hp": 300, "price_usd": 70000},
     "defender": {"brand": "Land Rover", "model": "Defender", "engine_cc": 2000, "power_hp": 300, "price_usd": 55000},
     "дефендер": {"brand": "Land Rover", "model": "Defender", "engine_cc": 2000, "power_hp": 300, "price_usd": 55000},
-    # Volvo
     "volvo xc90": {"brand": "Volvo", "model": "XC90", "engine_cc": 2000, "power_hp": 249, "price_usd": 60000},
     "volvo xc60": {"brand": "Volvo", "model": "XC60", "engine_cc": 2000, "power_hp": 190, "price_usd": 45000},
     "volvo xc40": {"brand": "Volvo", "model": "XC40", "engine_cc": 1500, "power_hp": 156, "price_usd": 35000},
-    # Skoda
     "skoda octavia": {"brand": "Skoda", "model": "Octavia", "engine_cc": 1400, "power_hp": 150, "price_usd": 22000},
     "октавия": {"brand": "Skoda", "model": "Octavia", "engine_cc": 1400, "power_hp": 150, "price_usd": 22000},
     "skoda kodiaq": {"brand": "Skoda", "model": "Kodiaq", "engine_cc": 2000, "power_hp": 190, "price_usd": 32000},
     "кодиак": {"brand": "Skoda", "model": "Kodiaq", "engine_cc": 2000, "power_hp": 190, "price_usd": 32000},
-    # Nissan
     "nissan x-trail": {"brand": "Nissan", "model": "X-Trail", "engine_cc": 1500, "power_hp": 163, "price_usd": 25000},
     "иксрейл": {"brand": "Nissan", "model": "X-Trail", "engine_cc": 1500, "power_hp": 163, "price_usd": 25000},
     "nissan patrol": {"brand": "Nissan", "model": "Patrol", "engine_cc": 4000, "power_hp": 275, "price_usd": 55000},
     "патрол": {"brand": "Nissan", "model": "Patrol", "engine_cc": 4000, "power_hp": 275, "price_usd": 55000},
     "nissan qashqai": {"brand": "Nissan", "model": "Qashqai", "engine_cc": 1300, "power_hp": 140, "price_usd": 22000},
     "кашкай": {"brand": "Nissan", "model": "Qashqai", "engine_cc": 1300, "power_hp": 140, "price_usd": 22000},
-    # Honda
     "honda cr-v": {"brand": "Honda", "model": "CR-V", "engine_cc": 1500, "power_hp": 193, "price_usd": 28000},
     "honda pilot": {"brand": "Honda", "model": "Pilot", "engine_cc": 3500, "power_hp": 285, "price_usd": 38000},
     "honda accord": {"brand": "Honda", "model": "Accord", "engine_cc": 1500, "power_hp": 192, "price_usd": 24000},
     "аккорд": {"brand": "Honda", "model": "Accord", "engine_cc": 1500, "power_hp": 192, "price_usd": 24000},
-    # Subaru
     "subaru outback": {"brand": "Subaru", "model": "Outback", "engine_cc": 2500, "power_hp": 175, "price_usd": 28000},
     "аутбэк": {"brand": "Subaru", "model": "Outback", "engine_cc": 2500, "power_hp": 175, "price_usd": 28000},
     "subaru forester": {"brand": "Subaru", "model": "Forester", "engine_cc": 2000, "power_hp": 150, "price_usd": 22000},
     "форестер": {"brand": "Subaru", "model": "Forester", "engine_cc": 2000, "power_hp": 150, "price_usd": 22000},
-    # Ford/Dodge/American
     "ford mustang": {"brand": "Ford", "model": "Mustang", "engine_cc": 5000, "power_hp": 450, "price_usd": 35000},
     "мустанг": {"brand": "Ford", "model": "Mustang", "engine_cc": 5000, "power_hp": 450, "price_usd": 35000},
     "ford explorer": {"brand": "Ford", "model": "Explorer", "engine_cc": 3000, "power_hp": 300, "price_usd": 40000},
@@ -258,7 +239,6 @@ KNOWN_CARS: Dict[str, Dict] = {
     "гранд чероки": {"brand": "Jeep", "model": "Grand Cherokee", "engine_cc": 3600, "power_hp": 290, "price_usd": 42000},
     "cadillac escalade": {"brand": "Cadillac", "model": "Escalade", "engine_cc": 6200, "power_hp": 420, "price_usd": 75000},
     "эскалейд": {"brand": "Cadillac", "model": "Escalade", "engine_cc": 6200, "power_hp": 420, "price_usd": 75000},
-    # Mitsubishi
     "mitsubishi outlander": {"brand": "Mitsubishi", "model": "Outlander", "engine_cc": 2000, "power_hp": 145, "price_usd": 22000},
     "аутлендер": {"brand": "Mitsubishi", "model": "Outlander", "engine_cc": 2000, "power_hp": 145, "price_usd": 22000},
     "mitsubishi pajero": {"brand": "Mitsubishi", "model": "Pajero", "engine_cc": 3000, "power_hp": 178, "price_usd": 35000},
@@ -274,9 +254,14 @@ SYSTEM_PROMPT = """Ты — AI-ассистент компании CARFIRE по 
 
 Тон: уверенный, спокойный, дружелюбный. Без воды. Живой язык.
 
+ВАЖНО: CARFIRE привозит ЛЮБЫЕ автомобили из ЛЮБЫХ стран — Китай, США, Европа, Япония, Корея, Канада.
+Мы можем привезти Audi, BMW, Mercedes, Toyota и абсолютно любую марку из любой страны.
+НИКОГДА не говори что мы не можем привезти машину или что она не производится в какой-то стране.
+НИКОГДА не говори что авто нет в базе — просто рассчитай стоимость.
+
 Правила:
-1. ВСЕГДА слушай запрос — если клиент назвал конкретную марку/модель, работай именно с ней
-2. Не придумывай данные — используй только контекст
+1. Если клиент назвал марку или модель — сразу предложи расчёт стоимости под ключ
+2. Если клиент спрашивает цену — сразу считай, не болтай
 3. Комиссию не упоминай пока не спросят
 4. К менеджеру только если клиент готов купить или просит оформить
 5. Не здоровайся повторно — продолжай разговор
@@ -311,12 +296,12 @@ async def get_usd_rate() -> float:
 
 def calc_duty(price_eur: float, cc: int, age: int) -> float:
     if age < 3:
-        if price_eur <= 8500:    return max(price_eur * 0.54, cc * 2.5)
-        elif price_eur <= 16700: return max(price_eur * 0.48, cc * 3.5)
-        elif price_eur <= 42300: return max(price_eur * 0.48, cc * 5.5)
-        elif price_eur <= 84500: return max(price_eur * 0.48, cc * 7.5)
-        elif price_eur <= 169000:return max(price_eur * 0.48, cc * 15.0)
-        else:                    return max(price_eur * 0.48, cc * 20.0)
+        if price_eur <= 8500:     return max(price_eur * 0.54, cc * 2.5)
+        elif price_eur <= 16700:  return max(price_eur * 0.48, cc * 3.5)
+        elif price_eur <= 42300:  return max(price_eur * 0.48, cc * 5.5)
+        elif price_eur <= 84500:  return max(price_eur * 0.48, cc * 7.5)
+        elif price_eur <= 169000: return max(price_eur * 0.48, cc * 15.0)
+        else:                     return max(price_eur * 0.48, cc * 20.0)
     elif age <= 5:
         if cc <= 1000:   return cc * 1.5
         elif cc <= 1500: return cc * 1.7
@@ -334,7 +319,7 @@ def calc_duty(price_eur: float, cc: int, age: int) -> float:
 
 
 def calc_excise(hp: int) -> float:
-    if hp <= 90:   return 0
+    if hp <= 90:    return 0
     elif hp <= 150: return hp * 55
     elif hp <= 200: return hp * 531
     elif hp <= 300: return hp * 869
@@ -389,6 +374,32 @@ def format_calc(label: str, c: Dict) -> str:
 def normalize(text: str) -> str:
     return re.sub(r"\s+", " ", text.strip().lower())
 
+def find_car(text: str) -> Optional[Dict]:
+    t = normalize(text)
+    # Сначала в базе
+    best_db, best_db_score = None, 0
+    for car in CARS_DATABASE:
+        score = 0
+        if car["brand"].lower() in t: score += 10
+        if car["model"].lower() in t: score += 8
+        yr = extract_year(text)
+        if yr and car["year"] == yr: score += 5
+        if score > best_db_score:
+            best_db_score = score
+            best_db = car
+    if best_db_score >= 8:
+        return {"source": "db", "data": best_db}
+    # Потом в словаре
+    best_key, best_len = None, 0
+    for key in KNOWN_CARS:
+        k = key.strip()
+        if k in t and len(k) > best_len:
+            best_key = key
+            best_len = len(k)
+    if best_key:
+        return {"source": "dict", "data": KNOWN_CARS[best_key]}
+    return None
+
 def asked_commission(text: str) -> bool:
     t = normalize(text)
     return any(w in t for w in ["комиссия", "сколько берете", "сколько берёте",
@@ -400,13 +411,19 @@ def needs_manager(text: str) -> bool:
 
 def wants_calc(text: str) -> bool:
     t = normalize(text)
-    return any(w in t for w in [
+    # Явные слова расчёта
+    calc_words = [
         "посчитай", "рассчитай", "посчитать", "рассчитать",
-        "сколько стоит под ключ", "итого", "расчёт", "расчет",
         "под ключ", "цена под ключ", "стоимость под ключ",
-        "сколько выйдет", "во сколько обойдётся", "во сколько обойдется",
+        "сколько стоит", "сколько будет", "сколько выйдет",
+        "во сколько обойдётся", "во сколько обойдется",
         "сколько стоит привезти", "сколько будет стоить",
-    ])
+        "почём", "почем", "цена", "стоимость", "расчёт", "расчет",
+    ]
+    if any(w in t for w in calc_words):
+        return True
+    # Если назвал конкретное авто — тоже считаем
+    return find_car(t) is not None
 
 def extract_year(text: str) -> Optional[int]:
     m = re.search(r"\b(19[5-9]\d|20[0-2]\d)\b", text)
@@ -429,36 +446,6 @@ def detect_under_160(text: str) -> bool:
     t = normalize(text)
     return any(w in t for w in ["до 160", "проходной", "проходная", "проходные",
                                   "до налоговой", "160 сил", "160 лс"])
-
-def find_car(text: str) -> Optional[Dict]:
-    """Ищем авто: сначала в базе, потом в словаре KNOWN_CARS"""
-    t = normalize(text)
-
-    # 1. Ищем в базе
-    best_db, best_db_score = None, 0
-    for car in CARS_DATABASE:
-        score = 0
-        if car["brand"].lower() in t: score += 10
-        if car["model"].lower() in t: score += 8
-        yr = extract_year(text)
-        if yr and car["year"] == yr: score += 5
-        if score > best_db_score:
-            best_db_score = score
-            best_db = car
-    if best_db_score >= 8:
-        return {"source": "db", "data": best_db}
-
-    # 2. Ищем в словаре — берём самый длинный совпадающий ключ
-    best_key, best_len = None, 0
-    for key in KNOWN_CARS:
-        k = key.strip()
-        if k in t and len(k) > best_len:
-            best_key = key
-            best_len = len(k)
-    if best_key:
-        return {"source": "dict", "data": KNOWN_CARS[best_key]}
-
-    return None
 
 def search_for_context(query: str, budget: Optional[int], countries: List[str],
                         under_160: bool, usd_rate: float) -> List[Dict]:
@@ -489,8 +476,8 @@ def build_context(user_id: int, text: str, usd_rate: float) -> str:
     cars = search_for_context(text, budget, countries, under_160, usd_rate)
 
     lines = [
-        f"Компания: {COMPANY_DATA['name']}",
-        f"Основные направления: {', '.join(COMPANY_DATA['main_directions'])}",
+        f"Компания: {COMPANY_DATA['name']} — привозим ЛЮБЫЕ авто из ЛЮБЫХ стран",
+        f"Основные: {', '.join(COMPANY_DATA['main_directions'])}",
         f"По запросу: {', '.join(COMPANY_DATA['extra_directions'])}",
         f"Курс USD: {usd_rate + 2:.2f} ₽",
     ]
@@ -518,7 +505,7 @@ def build_context(user_id: int, text: str, usd_rate: float) -> str:
                 f"{car['comment']}"
             )
     else:
-        lines.append("  Авто в базе не найдено.")
+        lines.append("  Авто из базы не подобрано — используй словарь KNOWN_CARS.")
 
     lines.append(f"\nМенеджер: {COMPANY_DATA['manager_telegram']}")
     return "\n".join(lines)
@@ -631,20 +618,12 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         found = find_car(llm_input)
         if found:
             d = found["data"]
-            price_usd = d["price_usd"]
-            cc = d["engine_cc"]
-            hp = d["power_hp"]
             year = year_override or (d.get("year") or 2023)
             label = f"{d['brand']} {d['model']} {year}"
-            calc = await do_calc(price_usd, cc, hp, year, usd_rate)
+            calc = await do_calc(d["price_usd"], d["engine_cc"], d["power_hp"], year, usd_rate)
             await update.message.reply_text(format_calc(label, calc), reply_markup=main_keyboard())
-        else:
-            await update.message.reply_text(
-                "Напиши марку и модель авто — и я рассчитаю стоимость под ключ.\n"
-                "Например: «посчитай BMW X5 2022» или «Audi A3 2024 под ключ».",
-                reply_markup=main_keyboard()
-            )
-        return CHAT
+            return CHAT
+        # Если авто не найдено — уходим в LLM чтобы он спросил уточнение
 
     user_histories.setdefault(user_id, [])
     user_histories[user_id].append({"role": "user", "content": llm_input})
@@ -658,8 +637,8 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {"role": "system", "content": "Контекст:\n" + ctx},
             ] + user_histories[user_id],
-            temperature=0.35,
-            max_tokens=600,
+            temperature=0.3,
+            max_tokens=500,
         )
         reply = response.choices[0].message.content.strip()
         if not reply:
