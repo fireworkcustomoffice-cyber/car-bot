@@ -33,22 +33,20 @@ KNOWN_CARS: Dict[str, Dict] = {
     "audi a6": {"brand": "Audi", "model": "A6", "engine_cc": 2000, "power_hp": 204, "price_usd": 38000},
     "ауди а6": {"brand": "Audi", "model": "A6", "engine_cc": 2000, "power_hp": 204, "price_usd": 38000},
     "а6": {"brand": "Audi", "model": "A6", "engine_cc": 2000, "power_hp": 204, "price_usd": 38000},
-    "audi q3": {"brand": "Audi", "model": "Q3", "engine_cc": 1500, "power_hp": 150, "price_usd": 25000},"ауди q3": {"brand": "Audi", "model": "Q3", "engine_cc": 1500, "power_hp": 150, "price_usd": 25000},
+    "audi a7": {"brand": "Audi", "model": "A7", "engine_cc": 3000, "power_hp": 340, "price_usd": 55000},
+    "audi a8": {"brand": "Audi", "model": "A8", "engine_cc": 3000, "power_hp": 340, "price_usd": 72000},
+    "audi q3": {"brand": "Audi", "model": "Q3", "engine_cc": 1500, "power_hp": 150, "price_usd": 25000},
+    "ауди q3": {"brand": "Audi", "model": "Q3", "engine_cc": 1500, "power_hp": 150, "price_usd": 25000},
     "ку3": {"brand": "Audi", "model": "Q3", "engine_cc": 1500, "power_hp": 150, "price_usd": 25000},
     "q3": {"brand": "Audi", "model": "Q3", "engine_cc": 1500, "power_hp": 150, "price_usd": 25000},
-    "ауди ку3": {"brand": "Audi", "model": "Q3", "engine_cc": 1500, "power_hp": 150, "price_usd": 25000},
-    "ку5": {"brand": "Audi", "model": "Q5", "engine_cc": 2000, "power_hp": 204, "price_usd": 42000},
-    "q5": {"brand": "Audi", "model": "Q5", "engine_cc": 2000, "power_hp": 204, "price_usd": 42000},
-    "ку7": {"brand": "Audi", "model": "Q7", "engine_cc": 3000, "power_hp": 249, "price_usd": 58000},
-    "q7": {"brand": "Audi", "model": "Q7", "engine_cc": 3000, "power_hp": 249, "price_usd": 58000},
-    "х5": {"brand": "BMW", "model": "X5", "engine_cc": 3000, "power_hp": 249, "price_usd": 52000},
-    "х3": {"brand": "BMW", "model": "X3", "engine_cc": 2000, "power_hp": 184, "price_usd": 38000},
-    "х6": {"brand": "BMW", "model": "X6", "engine_cc": 3000, "power_hp": 249, "price_usd": 55000},
-    "х7": {"brand": "BMW", "model": "X7", "engine_cc": 3000, "power_hp": 340, "price_usd": 75000},
     "audi q5": {"brand": "Audi", "model": "Q5", "engine_cc": 2000, "power_hp": 204, "price_usd": 42000},
     "ауди q5": {"brand": "Audi", "model": "Q5", "engine_cc": 2000, "power_hp": 204, "price_usd": 42000},
+    "ку5": {"brand": "Audi", "model": "Q5", "engine_cc": 2000, "power_hp": 204, "price_usd": 42000},
+    "q5": {"brand": "Audi", "model": "Q5", "engine_cc": 2000, "power_hp": 204, "price_usd": 42000},
     "audi q7": {"brand": "Audi", "model": "Q7", "engine_cc": 3000, "power_hp": 249, "price_usd": 58000},
     "ауди q7": {"brand": "Audi", "model": "Q7", "engine_cc": 3000, "power_hp": 249, "price_usd": 58000},
+    "ку7": {"brand": "Audi", "model": "Q7", "engine_cc": 3000, "power_hp": 249, "price_usd": 58000},
+    "q7": {"brand": "Audi", "model": "Q7", "engine_cc": 3000, "power_hp": 249, "price_usd": 58000},
     "audi q8": {"brand": "Audi", "model": "Q8", "engine_cc": 3000, "power_hp": 340, "price_usd": 75000},
     "bmw 1": {"brand": "BMW", "model": "1 Series", "engine_cc": 1500, "power_hp": 140, "price_usd": 18000},
     "бмв 1": {"brand": "BMW", "model": "1 Series", "engine_cc": 1500, "power_hp": 140, "price_usd": 18000},
@@ -60,14 +58,19 @@ KNOWN_CARS: Dict[str, Dict] = {
     "бмв 7": {"brand": "BMW", "model": "7 Series", "engine_cc": 3000, "power_hp": 340, "price_usd": 70000},
     "bmw x1": {"brand": "BMW", "model": "X1", "engine_cc": 1500, "power_hp": 136, "price_usd": 22000},
     "бмв х1": {"brand": "BMW", "model": "X1", "engine_cc": 1500, "power_hp": 136, "price_usd": 22000},
+    "х1": {"brand": "BMW", "model": "X1", "engine_cc": 1500, "power_hp": 136, "price_usd": 22000},
     "bmw x3": {"brand": "BMW", "model": "X3", "engine_cc": 2000, "power_hp": 184, "price_usd": 38000},
     "бмв х3": {"brand": "BMW", "model": "X3", "engine_cc": 2000, "power_hp": 184, "price_usd": 38000},
+    "х3": {"brand": "BMW", "model": "X3", "engine_cc": 2000, "power_hp": 184, "price_usd": 38000},
     "bmw x5": {"brand": "BMW", "model": "X5", "engine_cc": 3000, "power_hp": 249, "price_usd": 52000},
     "бмв х5": {"brand": "BMW", "model": "X5", "engine_cc": 3000, "power_hp": 249, "price_usd": 52000},
+    "х5": {"brand": "BMW", "model": "X5", "engine_cc": 3000, "power_hp": 249, "price_usd": 52000},
     "bmw x6": {"brand": "BMW", "model": "X6", "engine_cc": 3000, "power_hp": 249, "price_usd": 55000},
     "бмв х6": {"brand": "BMW", "model": "X6", "engine_cc": 3000, "power_hp": 249, "price_usd": 55000},
+    "х6": {"brand": "BMW", "model": "X6", "engine_cc": 3000, "power_hp": 249, "price_usd": 55000},
     "bmw x7": {"brand": "BMW", "model": "X7", "engine_cc": 3000, "power_hp": 340, "price_usd": 75000},
     "бмв х7": {"brand": "BMW", "model": "X7", "engine_cc": 3000, "power_hp": 340, "price_usd": 75000},
+    "х7": {"brand": "BMW", "model": "X7", "engine_cc": 3000, "power_hp": 340, "price_usd": 75000},
     "mercedes c": {"brand": "Mercedes", "model": "C-Class", "engine_cc": 1500, "power_hp": 170, "price_usd": 32000},
     "мерседес с": {"brand": "Mercedes", "model": "C-Class", "engine_cc": 1500, "power_hp": 170, "price_usd": 32000},
     "мерс с": {"brand": "Mercedes", "model": "C-Class", "engine_cc": 1500, "power_hp": 170, "price_usd": 32000},
@@ -75,6 +78,7 @@ KNOWN_CARS: Dict[str, Dict] = {
     "mercedes e": {"brand": "Mercedes", "model": "E-Class", "engine_cc": 2000, "power_hp": 197, "price_usd": 45000},
     "мерседес е": {"brand": "Mercedes", "model": "E-Class", "engine_cc": 2000, "power_hp": 197, "price_usd": 45000},
     "мерс е": {"brand": "Mercedes", "model": "E-Class", "engine_cc": 2000, "power_hp": 197, "price_usd": 45000},
+    "мерс e": {"brand": "Mercedes", "model": "E-Class", "engine_cc": 2000, "power_hp": 197, "price_usd": 45000},
     "mercedes s": {"brand": "Mercedes", "model": "S-Class", "engine_cc": 3000, "power_hp": 340, "price_usd": 85000},
     "mercedes glc": {"brand": "Mercedes", "model": "GLC", "engine_cc": 2000, "power_hp": 204, "price_usd": 48000},
     "mercedes gle": {"brand": "Mercedes", "model": "GLE", "engine_cc": 3000, "power_hp": 330, "price_usd": 68000},
@@ -130,7 +134,6 @@ KNOWN_CARS: Dict[str, Dict] = {
     "haval h6": {"brand": "Haval", "model": "H6", "engine_cc": 1500, "power_hp": 150, "price_usd": 13000},
     "haval h9": {"brand": "Haval", "model": "H9", "engine_cc": 2000, "power_hp": 218, "price_usd": 24000},
     "geely atlas": {"brand": "Geely", "model": "Atlas", "engine_cc": 1500, "power_hp": 150, "price_usd": 12000},
-    "чери тиго": {"brand": "Chery", "model": "Tiggo 7", "engine_cc": 1500, "power_hp": 150, "price_usd": 12000},
     "chery tiggo": {"brand": "Chery", "model": "Tiggo 7", "engine_cc": 1500, "power_hp": 150, "price_usd": 12000},
     "byd han": {"brand": "BYD", "model": "Han", "engine_cc": 1500, "power_hp": 218, "price_usd": 22000},
     "byd seal": {"brand": "BYD", "model": "Seal", "engine_cc": 1500, "power_hp": 313, "price_usd": 20000},
@@ -180,42 +183,38 @@ KNOWN_CARS: Dict[str, Dict] = {
 
 user_histories: Dict[int, List[Dict[str, str]]] = {}
 user_profiles: Dict[int, Dict[str, Any]] = {}
+# Запоминаем последнее авто о котором говорили
+last_car_discussed: Dict[int, Dict] = {}
+
 GET_NAME, GET_PHONE, CHAT = range(3)
 
 SYSTEM_PROMPT = """Ты — Игорь, AI-ассистент компании CARFIRE. Занимаемся пригоном автомобилей из-за рубежа.
 
-О компании:
-— Основные направления: Китай и США
+О компании CARFIRE:
+— Приоритетные направления: Китай и США
 — По запросу: Европа, Канада, Япония, Корея
-— Везём любые марки и модели
-— Комиссия CARFIRE: 90 000 ₽ за полное сопровождение (не говори об этом пока не спросят)
-— Сроки из Китая: 3–6 недель, из США: 6–10 недель, Европа: индивидуально
+— Из Китая: привозим новые и б/у авто, обычно более высокая комплектация чем в РФ
+— Из США: работаем с аукционами битых авто (Copart, IAAI), восстанавливаем до идеального состояния — клиент получает отличную машину по выгодной цене
+— Из Европы и других стран: по запросу, индивидуально
+— Комиссия CARFIRE: 90 000 ₽ (не говори об этом пока не спросят)
+— Сроки из Китая: 3–6 недель
+— Сроки из США: 6–10 недель
+— Европа и другие: индивидуально
 — Менеджер Евгений: @superluxxx
 
-Стиль общения:
-— Живой, дружелюбный, уверенный
+Стиль:
+— Живой, дружелюбный, уверенный. Как опытный консультант
 — Без воды и канцелярщины
-— Как опытный консультант который реально разбирается в теме
-— Иногда обращайся к клиенту по имени
+— Иногда обращайся по имени
 
-Что делать при разных запросах:
-
-1. Если клиент интересуется конкретной маркой/моделью — скажи что везём, уточни год и страну если не указал, предложи посчитать стоимость
-
-2. Если клиент спрашивает про стоимость или просит посчитать — ВАЖНО: отвечай что расчёт уже готов или предложи его сделать. Напиши "Посчитай [модель] [год]" чтобы получить точный расчёт под ключ.
-
-3. Если клиент спрашивает общие вопросы (сроки, документы, растаможка, как работает) — отвечай развёрнуто и по делу
-
-4. Если клиент готов покупать — передай менеджеру Евгению: @superluxxx
-
-Жёсткие правила:
-— НИКОГДА не говори что мы не можем привезти какую-то машину
-— НИКОГДА не говори что авто нет в базе
-— Не называй точную итоговую сумму — только ориентир. Точный расчёт даёт кнопка или команда "посчитай"
-— Не здоровайся повторно в одном диалоге
-— Не навязывай менеджера без причины — сначала помоги сам
-— Отвечай на русском языке
-— Максимум 5 предложений в ответе
+ВАЖНЫЕ ПРАВИЛА:
+1. Никогда не говори клиенту "напиши посчитай" или "дай команду" — ты сам всё считаешь
+2. Никогда не говори что мы не можем что-то привезти
+3. Если клиент называет авто и спрашивает цену — в контексте уже есть готовый расчёт, назови его
+4. Не навязывай менеджера без причины
+5. Не здоровайся повторно
+6. Максимум 4–5 предложений
+7. Только русский язык
 """
 
 client = Groq(api_key=GROQ_API_KEY)
@@ -298,19 +297,20 @@ def format_calc(label: str, c: Dict) -> str:
     return (
         f"Расчёт под ключ — {label} ({age_str})\n"
         f"Курс USD: {c['rate']:.2f} ₽\n\n"
-        f"Цена авто:                {r(c['price_rub'])} ₽\n"
-        f"Оформление в стране:      {r(c['china'])} ₽\n"
-        f"Перевод (2%):             {r(c['transfer'])} ₽\n"
-        f"Доставка до России:       {r(c['logistics'])} ₽\n"
-        f"Таможенная пошлина:       {r(c['duty'])} ₽\n"
-        f"Утилизационный сбор:      {r(c['util'])} ₽\n"
-        f"Акциз:                    {r(c['excise'])} ₽\n"
-        f"СБКТС + ЭПТС + рус-я:    75 000 ₽\n"
-        f"Комиссия CARFIRE:         90 000 ₽\n\n"
+        f"Цена авто:              {r(c['price_rub'])} ₽\n"
+        f"Оформление в стране:    {r(c['china'])} ₽\n"
+        f"Перевод (2%):           {r(c['transfer'])} ₽\n"
+        f"Доставка до России:     {r(c['logistics'])} ₽\n"
+        f"Таможенная пошлина:     {r(c['duty'])} ₽\n"
+        f"Утилизационный сбор:    {r(c['util'])} ₽\n"
+        f"Акциз:                  {r(c['excise'])} ₽\n"
+        f"СБКТС + ЭПТС + рус-я:  75 000 ₽\n"
+        f"Комиссия CARFIRE:       90 000 ₽\n\n"
         f"Итого под ключ:\n"
         f"от {r(c['total_min'])} до {r(c['total_max'])} ₽\n\n"
         f"Расчёт ориентировочный. Точную сумму уточнит менеджер: @superluxxx"
     )
+
 
 def normalize(text: str) -> str:
     return re.sub(r"\s+", " ", text.strip().lower())
@@ -329,19 +329,14 @@ def find_car(text: str) -> Optional[Dict]:
             best_len = len(k)
     return KNOWN_CARS[best_key] if best_key else None
 
-def needs_calc(text: str) -> bool:
+def is_price_question(text: str) -> bool:
     t = normalize(text)
-    calc_words = [
-        "посчитай", "рассчитай", "посчитать", "рассчитать",
-        "под ключ", "сколько стоит", "сколько будет стоить",
-        "сколько выйдет", "во сколько обойдётся", "во сколько обойдется",
-        "расчёт", "расчет", "цена под ключ", "стоимость под ключ",
-        "сколько стоит привезти", "почём", "почем",
-    ]
-    if any(w in t for w in calc_words):
-        return True
-    # Если назвал конкретное авто — тоже считаем
-    return find_car(t) is not None
+    return any(w in t for w in [
+        "сколько", "цена", "стоимость", "почём", "почем",
+        "посчитай", "рассчитай", "под ключ", "расчёт", "расчет",
+        "сколько стоит", "сколько будет", "сколько выйдет",
+        "во сколько", "итого", "выйдет",
+    ])
 
 def needs_manager(text: str) -> bool:
     t = normalize(text)
@@ -416,8 +411,8 @@ async def get_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
     logging.info(f"Лид | {name} | {phone} | @{username} | {user_id}")
     await notify_managers(context.bot, name, phone, user_id, username)
     await update.message.reply_text(
-        f"Отлично, {name}!\n\nСпрашивай что интересует — из каких стран везём, "
-        f"сроки, стоимость, растаможка. Или назови марку и модель — посчитаю под ключ 👇",
+        f"Отлично, {name}!\n\nСпрашивай что интересует — марку, модель, страну, бюджет.\n"
+        f"Назови авто — сразу рассчитаю стоимость под ключ 👇",
         reply_markup=main_keyboard()
     )
     return CHAT
@@ -434,11 +429,11 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return CHAT
 
     quick_map = {
-        "🚗 Подобрать авто": "Хочу подобрать автомобиль для пригона. Что можете предложить?",
+        "🚗 Подобрать авто": "Хочу подобрать автомобиль для пригона.",
         "💰 Рассчитать стоимость": "Хочу рассчитать стоимость автомобиля под ключ.",
-        "⚡ До 160 л.с.": "Интересуют авто до 160 л.с. — проходные по налогу. Что есть?",
+        "⚡ До 160 л.с.": "Интересуют авто до 160 л.с. — проходные по налогу.",
         "🌍 Из каких стран везёте?": "Из каких стран вы привозите автомобили?",
-        "⏱ Сроки доставки": "Какие сроки доставки по разным направлениям?",
+        "⏱ Сроки доставки": "Какие сроки доставки?",
     }
     llm_input = quick_map.get(user_text, user_text)
 
@@ -450,44 +445,46 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return CHAT
 
     usd_rate = await get_usd_rate()
-
-    # Запрос расчёта — ищем авто и считаем
-    if needs_calc(llm_input):
-        year_override = extract_year(llm_input)
-        car = find_car(llm_input)
-        if car:
-            year = year_override or 2023
-            label = f"{car['brand']} {car['model']} {year}"
-            calc = await do_calc(car["price_usd"], car["engine_cc"], car["power_hp"], year, usd_rate)
-            await update.message.reply_text(format_calc(label, calc), reply_markup=main_keyboard())
-            return CHAT
-
-    # Всё остальное — LLM
     profile = user_profiles.get(user_id, {})
     name = profile.get("name", "")
 
-    # Собираем контекст для LLM
-    car_in_msg = find_car(llm_input)
-    year_in_msg = extract_year(llm_input)
+    # Ищем авто в сообщении
+    car = find_car(llm_input)
+    year = extract_year(llm_input)
+
+    # Если нашли авто — запоминаем его
+    if car:
+        last_car_discussed[user_id] = {"car": car, "year": year}
+    # Если авто не назвали но спрашивают цену — берём последнее обсуждаемое
+    elif is_price_question(llm_input) and user_id in last_car_discussed:
+        car = last_car_discussed[user_id]["car"]
+        year = year or last_car_discussed[user_id].get("year")
+
+    # Если есть авто и вопрос о цене — сразу считаем
+    if car and is_price_question(llm_input):
+        calc_year = year or 2023
+        calc = await do_calc(car["price_usd"], car["engine_cc"], car["power_hp"], calc_year, usd_rate)
+        label = f"{car['brand']} {car['model']} {calc_year}"
+        await update.message.reply_text(format_calc(label, calc), reply_markup=main_keyboard())
+        return CHAT
+
+    # Если просто назвали авто без вопроса о цене — LLM отвечает с контекстом цены
     car_context = ""
-    if car_in_msg:
-        year = year_in_msg or 2023
-        age = 2025 - year
-        approx_calc = await do_calc(car_in_msg["price_usd"], car_in_msg["engine_cc"],
-                                     car_in_msg["power_hp"], year, usd_rate)
+    if car:
+        calc_year = year or 2023
+        approx = await do_calc(car["price_usd"], car["engine_cc"], car["power_hp"], calc_year, usd_rate)
         car_context = (
-            f"\nАвто в запросе: {car_in_msg['brand']} {car_in_msg['model']} {year} | "
-            f"{car_in_msg['power_hp']} л.с. | {car_in_msg['engine_cc']} куб.см\n"
-            f"Ориентировочная стоимость под ключ: "
-            f"от {int(approx_calc['total_min']):,} до {int(approx_calc['total_max']):,} ₽\n"
-            f"(скажи клиенту этот диапазон если спрашивает о цене)\n"
+            f"\n\nАвто в запросе: {car['brand']} {car['model']} {calc_year} | "
+            f"{car['power_hp']} л.с. | {car['engine_cc']} куб.см\n"
+            f"Готовый расчёт под ключ: от {int(approx['total_min']):,} до {int(approx['total_max']):,} ₽\n"
+            f"Курс USD: {approx['rate']:.2f} ₽\n"
+            f"Используй эти цифры если клиент спрашивает о цене — называй их сам, не проси клиента что-то писать."
         ).replace(",", " ")
 
-    system_with_context = SYSTEM_PROMPT
+    system = SYSTEM_PROMPT
     if name:
-        system_with_context += f"\nИмя клиента: {name}"
-    if car_context:
-        system_with_context += car_context
+        system += f"\n\nИмя клиента: {name}"
+    system += car_context
 
     user_histories.setdefault(user_id, [])
     user_histories[user_id].append({"role": "user", "content": llm_input})
@@ -496,9 +493,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         response = client.chat.completions.create(
             model="llama-3.3-70b-versatile",
-            messages=[
-                {"role": "system", "content": system_with_context},
-            ] + user_histories[user_id],
+            messages=[{"role": "system", "content": system}] + user_histories[user_id],
             temperature=0.4,
             max_tokens=500,
         )
