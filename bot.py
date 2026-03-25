@@ -1,7 +1,6 @@
 import os
 import re
 import logging
-import asyncio
 from typing import Dict, List, Any, Optional
 
 import aiohttp
@@ -49,7 +48,7 @@ COMPANY_DATA: Dict[str, Any] = {
         "Япония": "Индивидуально",
         "Корея": "Индивидуально",
     },
-    "customs_note": "Итоговая стоимость зависит от курса, мощности, года выпуска и комплектации.",
+    "customs_note": "Итоговая стоимость зависит от курса, мощности, года выпуска и объёма двигателя.",
     "lead_handoff_triggers": [
         "хочу купить", "готов купить", "нужен точный расчет", "нужен точный расчёт",
         "давай оформлять", "хочу подбор", "подберите мне", "оформить заявку",
@@ -122,19 +121,16 @@ SYSTEM_PROMPT = """Ты — AI-ассистент компании CARFIRE по 
 4. Передавать клиента менеджеру когда он готов
 
 Жёсткие правила:
-1. Используй только данные из контекста — не придумывай
-2. Комиссию не называй если клиент не спросил
-3. Не гони к менеджеру при каждом вопросе — сначала помоги сам
-4. К менеджеру только если: готов купить, просит точный расчёт, нестандартный кейс
-5. Не здоровайся повторно — просто продолжай разговор
-6. Показывай 2–3 варианта авто если есть подходящие
-7. 3–5 предложений в ответе
-8. Только русский язык
-9. Если спросят кто ты — честно скажи что ИИ-ассистент
-
-Когда показываешь расчёт стоимости — используй данные из контекста.
-Показывай вилку: от минимума до максимума.
-Разбивай по статьям чтобы клиент видел из чего складывается цена.
+1. ВСЕГДА слушай запрос клиента — если он назвал конкретную марку или модель, работай именно с ней
+2. Используй только данные из контекста — не придумывай
+3. Комиссию не называй если клиент не спросил
+4. Не гони к менеджеру при каждом вопросе — сначала помоги сам
+5. К менеджеру только если: готов купить, просит оформить, нестандартный кейс
+6. Не здоровайся повторно — просто продолжай разговор
+7. Показывай 2–3 варианта авто если есть подходящие
+8. 3–5 предложений в ответе
+9. Только русский язык
+10. Если спросят кто ты — честно скажи что ИИ-ассистент CARFIRE
 
 Передача менеджеру:
 "Передаю тебя менеджеру Евгению — он сделает точный расчёт: @superluxxx"
@@ -156,7 +152,8 @@ async def get_usd_rate() -> float:
     try:
         async with aiohttp.ClientSession() as session:
             async with session.get(
-                "https://www.cbr-xml-daily.ru/daily_json.js", timeout=aiohttp.ClientTimeout(total=5)
+                "https://www.cbr-xml-daily.ru/daily_json.js",
+                timeout=aiohttp.ClientTimeout(total=5)
             ) as resp:
                 data = await resp.json(content_type=None)
                 rate = data["Valute"]["USD"]["Value"]
@@ -164,114 +161,130 @@ async def get_usd_rate() -> float:
                 _usd_rate_cache["ts"] = now
                 return rate
     except Exception as e:
-        logging.error(f"Ошибка получения курса ЦБ: {e}")
+        logging.error(f"Ошибка курса ЦБ: {e}")
         return 90.0
 
 
 # -----------------------------
-# ТАМОЖЕННЫЙ КАЛЬКУЛЯТОР
+# ТАМОЖЕННЫЙ КАЛЬКУЛЯТОР (полный)
 # -----------------------------
-def calc_customs(price_eur: float, engine_cc: int, age_years: int, power_hp: int) -> Dict[str, float]:
+def calc_customs_duty(price_eur: float, engine_cc: int, age_years: int) -> float:
     """
-    Расчёт таможенных платежей для физлиц (ЕАЭС).
-    Возраст 3-5 лет — ставки для подержанных авто.
+    Расчёт таможенной пошлины по правилам ЕАЭС для физлиц.
+    age_years = 2025 - год выпуска
     """
-    if age_years <= 3:
-        # Новые авто (до 3 лет)
+    if age_years < 3:
+        # Новые (до 3 лет)
         if price_eur <= 8500:
-            rate = max(price_eur * 0.54, engine_cc * 2.5)
+            return max(price_eur * 0.54, engine_cc * 2.5)
         elif price_eur <= 16700:
-            rate = max(price_eur * 0.48, engine_cc * 3.5)
+            return max(price_eur * 0.48, engine_cc * 3.5)
         elif price_eur <= 42300:
-            rate = max(price_eur * 0.48, engine_cc * 5.5)
+            return max(price_eur * 0.48, engine_cc * 5.5)
         elif price_eur <= 84500:
-            rate = max(price_eur * 0.48, engine_cc * 7.5)
+            return max(price_eur * 0.48, engine_cc * 7.5)
         elif price_eur <= 169000:
-            rate = max(price_eur * 0.48, engine_cc * 15.0)
+            return max(price_eur * 0.48, engine_cc * 15.0)
         else:
-            rate = max(price_eur * 0.48, engine_cc * 20.0)
-    else:
-        # Б/у 3-5 лет
+            return max(price_eur * 0.48, engine_cc * 20.0)
+    elif age_years <= 5:
+        # Б/у 3–5 лет
         if engine_cc <= 1000:
-            rate = engine_cc * 1.5
+            return engine_cc * 1.5
         elif engine_cc <= 1500:
-            rate = engine_cc * 1.7
+            return engine_cc * 1.7
         elif engine_cc <= 1800:
-            rate = engine_cc * 2.5
+            return engine_cc * 2.5
         elif engine_cc <= 2300:
-            rate = engine_cc * 2.7
+            return engine_cc * 2.7
         elif engine_cc <= 3000:
-            rate = engine_cc * 3.0
+            return engine_cc * 3.0
         else:
-            rate = engine_cc * 3.6
+            return engine_cc * 3.6
+    else:
+        # Старше 5 лет
+        if engine_cc <= 1000:
+            return engine_cc * 3.0
+        elif engine_cc <= 1500:
+            return engine_cc * 3.2
+        elif engine_cc <= 1800:
+            return engine_cc * 3.5
+        elif engine_cc <= 2300:
+            return engine_cc * 4.8
+        elif engine_cc <= 3000:
+            return engine_cc * 5.0
+        else:
+            return engine_cc * 5.7
 
-    # Утилизационный сбор (физлица, б/у)
+
+def calc_util_sbor(engine_cc: int, age_years: int) -> float:
+    """Утилизационный сбор для физлиц (б/у авто)"""
     base = 20000
-    if engine_cc <= 1000:
-        util = base * 0.17
-    elif engine_cc <= 2000:
-        util = base * 0.17
-    elif engine_cc <= 3000:
-        util = base * 0.17
+    if age_years < 3:
+        if engine_cc <= 1000:
+            return base * 0.17
+        elif engine_cc <= 2000:
+            return base * 0.17
+        elif engine_cc <= 3000:
+            return base * 0.17
+        else:
+            return base * 0.17
     else:
-        util = base * 0.17
+        if engine_cc <= 1000:
+            return base * 0.26
+        elif engine_cc <= 2000:
+            return base * 0.26
+        elif engine_cc <= 3000:
+            return base * 0.26
+        else:
+            return base * 0.26
 
-    # Акциз (рублей за л.с.)
+
+def calc_excise(power_hp: int) -> float:
+    """Акциз на автомобили (2024)"""
     if power_hp <= 90:
-        excise = 0
+        return 0
     elif power_hp <= 150:
-        excise = power_hp * 55
+        return power_hp * 55
     elif power_hp <= 200:
-        excise = power_hp * 531
+        return power_hp * 531
     elif power_hp <= 300:
-        excise = power_hp * 869
+        return power_hp * 869
     else:
-        excise = power_hp * 1063
-
-    return {
-        "customs_duty_eur": rate,
-        "util_rub": util,
-        "excise_rub": excise,
-    }
+        return power_hp * 1063
 
 
-async def calc_total(car: Dict, usd_rate: float) -> Dict[str, Any]:
-    rate = usd_rate + 2  # курс ЦБ + 2 рубля
-    eur_rate = rate * 0.93  # примерный курс евро
+async def calc_total(
+    price_usd: float,
+    engine_cc: int,
+    power_hp: int,
+    year: int,
+    usd_rate: float
+) -> Dict[str, Any]:
+    rate = usd_rate + 2
+    eur_rate = rate * 0.93
 
-    price_rub = car["price_usd"] * rate
+    age = 2025 - year
+    price_rub = price_usd * rate
     china_processing_rub = COMPANY_DATA["china_processing_usd"] * rate
-
-    # База для комиссии за перевод = цена авто + оформление в Китае
     transfer_base_rub = price_rub + china_processing_rub
     transfer_commission_rub = transfer_base_rub * COMPANY_DATA["transfer_commission_pct"]
-
     logistics_rub = COMPANY_DATA["logistics_usd"] * rate
 
-    # Таможня
-    price_eur = car["price_usd"] * 0.93
-    age = 2025 - car["year"]
-    customs = calc_customs(price_eur, car["engine_cc"], age, car["power_hp"])
-    customs_duty_rub = customs["customs_duty_eur"] * eur_rate
-    util_rub = customs["util_rub"]
-    excise_rub = customs["excise_rub"]
+    price_eur = price_usd * 0.93
+    duty_eur = calc_customs_duty(price_eur, engine_cc, age)
+    customs_duty_rub = duty_eur * eur_rate
+    util_rub = calc_util_sbor(engine_cc, age)
+    excise_rub = calc_excise(power_hp)
 
     sbkts_rub = COMPANY_DATA["sbkts_epts_rus_rub"]
     our_commission_rub = COMPANY_DATA["commission_rub"]
     hidden_margin_rub = COMPANY_DATA["hidden_margin_rub"]
 
-    # Итог (с учётом скрытой маржи)
     total = (
-        price_rub
-        + china_processing_rub
-        + transfer_commission_rub
-        + logistics_rub
-        + customs_duty_rub
-        + util_rub
-        + excise_rub
-        + sbkts_rub
-        + our_commission_rub
-        + hidden_margin_rub
+        price_rub + china_processing_rub + transfer_commission_rub
+        + logistics_rub + customs_duty_rub + util_rub + excise_rub
+        + sbkts_rub + our_commission_rub + hidden_margin_rub
     )
 
     margin = 50000
@@ -288,31 +301,29 @@ async def calc_total(car: Dict, usd_rate: float) -> Dict[str, Any]:
         "total_min": total - margin,
         "total_max": total + margin,
         "usd_rate": rate,
+        "age": age,
     }
 
 
-def format_calc(car: Dict, calc: Dict) -> str:
+def format_calc(label: str, calc: Dict) -> str:
     def r(x): return f"{int(round(x)):,}".replace(",", " ")
-    lines = [
-        f"💰 Расчёт стоимости под ключ — {car['brand']} {car['model']} {car['year']}",
-        f"",
-        f"🚗 Цена авто в Китае: {r(calc['price_rub'])} ₽",
-        f"📦 Оформление в Китае: {r(calc['china_processing_rub'])} ₽",
-        f"💳 Комиссия за перевод (2%): {r(calc['transfer_commission_rub'])} ₽",
-        f"🚢 Доставка до России: {r(calc['logistics_rub'])} ₽",
-        f"🛃 Таможенная пошлина: {r(calc['customs_duty_rub'])} ₽",
-        f"♻️ Утилизационный сбор: {r(calc['util_rub'])} ₽",
-        f"⚡ Акциз: {r(calc['excise_rub'])} ₽",
-        f"📋 СБКТС + ЭПТС + русификация: {r(calc['sbkts_rub'])} ₽",
-        f"🤝 Комиссия CARFIRE: {r(calc['our_commission_rub'])} ₽",
-        f"",
-        f"━━━━━━━━━━━━━━━━━━━━",
-        f"📌 Итого под ключ: от {r(calc['total_min'])} до {r(calc['total_max'])} ₽",
-        f"",
-        f"Курс USD: {calc['usd_rate']:.2f} ₽",
-        f"Расчёт ориентировочный. Точную сумму подтвердит менеджер Евгений: @superluxxx",
-    ]
-    return "\n".join(lines)
+    age_label = "новый" if calc["age"] < 3 else f"б/у ({calc['age']} лет)"
+    return (
+        f"💰 Расчёт под ключ — {label} ({age_label})\n\n"
+        f"🚗 Цена авто в Китае: {r(calc['price_rub'])} ₽\n"
+        f"📦 Оформление в Китае: {r(calc['china_processing_rub'])} ₽\n"
+        f"💳 Комиссия за перевод (2%): {r(calc['transfer_commission_rub'])} ₽\n"
+        f"🚢 Доставка до России: {r(calc['logistics_rub'])} ₽\n"
+        f"🛃 Таможенная пошлина: {r(calc['customs_duty_rub'])} ₽\n"
+        f"♻️ Утилизационный сбор: {r(calc['util_rub'])} ₽\n"
+        f"⚡ Акциз: {r(calc['excise_rub'])} ₽\n"
+        f"📋 СБКТС + ЭПТС + русификация: {r(calc['sbkts_rub'])} ₽\n"
+        f"🤝 Комиссия CARFIRE: {r(calc['our_commission_rub'])} ₽\n\n"
+        f"━━━━━━━━━━━━━━━━━━━━\n"
+        f"📌 Итого под ключ: от {r(calc['total_min'])} до {r(calc['total_max'])} ₽\n\n"
+        f"Курс USD: {calc['usd_rate']:.2f} ₽\n"
+        f"Расчёт ориентировочный. Точную сумму подтвердит менеджер: @superluxxx"
+    )
 
 
 # -----------------------------
@@ -320,9 +331,6 @@ def format_calc(car: Dict, calc: Dict) -> str:
 # -----------------------------
 def normalize(text: str) -> str:
     return re.sub(r"\s+", " ", text.strip().lower())
-
-def format_price(price_from: int, price_to: int) -> str:
-    return f"от {price_from:,} до {price_to:,} ₽".replace(",", " ")
 
 def asked_commission(text: str) -> bool:
     t = normalize(text)
@@ -335,8 +343,10 @@ def needs_manager(text: str) -> bool:
 
 def wants_calc(text: str) -> bool:
     t = normalize(text)
-    return any(w in t for w in ["посчитай", "рассчитай", "сколько стоит под ключ",
-                                  "итого", "расчёт", "расчет", "под ключ", "цена под ключ"])
+    return any(w in t for w in [
+        "посчитай", "рассчитай", "сколько стоит под ключ", "посчитать",
+        "итого", "расчёт", "расчет", "под ключ", "цена под ключ", "стоимость под ключ"
+    ])
 
 def extract_budget(text: str) -> Optional[int]:
     t = normalize(text).replace("₽", "").replace("рублей", "").replace("руб", "")
@@ -344,6 +354,13 @@ def extract_budget(text: str) -> Optional[int]:
     if m:
         return int(float(m.group(1).replace(",", ".")) * 1_000_000)
     m = re.search(r"\b(\d{6,8})\b", t)
+    if m:
+        return int(m.group(1))
+    return None
+
+def extract_year(text: str) -> Optional[int]:
+    """Извлекаем год из текста — например 2019, 2022"""
+    m = re.search(r"\b(19[5-9]\d|20[0-2]\d)\b", text)
     if m:
         return int(m.group(1))
     return None
@@ -358,8 +375,32 @@ def detect_under_160(text: str) -> bool:
     return any(w in t for w in ["до 160", "проходной", "проходная", "проходные",
                                   "до налоговой", "160 сил", "160 лс"])
 
+def find_car_in_text(text: str) -> Optional[Dict]:
+    """Ищем упоминание конкретной марки/модели в тексте"""
+    t = normalize(text)
+    best = None
+    best_score = 0
+    for car in CARS_DATABASE:
+        score = 0
+        if car["brand"].lower() in t:
+            score += 10
+        if car["model"].lower() in t:
+            score += 8
+        year_in_text = extract_year(text)
+        if year_in_text and car["year"] == year_in_text:
+            score += 5
+        if score > best_score:
+            best_score = score
+            best = car
+    return best if best_score >= 8 else None
+
 def search_cars(query: str, budget_rub: Optional[int], countries: List[str],
                 under_160: bool, usd_rate: float = 90.0) -> List[Dict]:
+    # Сначала пробуем найти конкретную марку/модель
+    exact = find_car_in_text(query)
+    if exact:
+        return [exact]
+
     q = normalize(query)
     results = []
     for car in CARS_DATABASE:
@@ -370,8 +411,8 @@ def search_cars(query: str, budget_rub: Optional[int], countries: List[str],
         if under_160 and not car.get("is_under_160_hp"):
             continue
         if budget_rub:
-            approx_price = car["price_usd"] * (usd_rate + 2) * 1.5
-            if approx_price > budget_rub:
+            approx = car["price_usd"] * (usd_rate + 2) * 1.5
+            if approx > budget_rub:
                 continue
         score = 0
         blob = f"{car['brand']} {car['model']} {car['country']} {car['comment']}".lower()
@@ -401,60 +442,59 @@ def build_context(user_id: int, user_text: str, usd_rate: float) -> str:
         f"По запросу: {', '.join(COMPANY_DATA['extra_directions'])}",
         f"Предоплата: {COMPANY_DATA['prepayment_policy']}",
         f"Расчёт: {COMPANY_DATA['customs_note']}",
-        f"Текущий курс USD: {usd_rate + 2:.2f} ₽ (ЦБ + 2 ₽)",
+        f"Текущий курс USD: {usd_rate + 2:.2f} ₽",
     ]
-
     if name:
         lines.append(f"Имя клиента: {name}")
     if budget:
-        lines.append(f"Бюджет клиента: до {budget:,} ₽".replace(",", " "))
+        lines.append(f"Бюджет: до {budget:,} ₽".replace(",", " "))
     if countries:
-        lines.append(f"Интересующие страны: {', '.join(countries)}")
+        lines.append(f"Страны: {', '.join(countries)}")
     if under_160:
-        lines.append("Клиент ищет авто до 160 л.с.")
+        lines.append("Клиент ищет до 160 л.с.")
 
-    lines.append("\nСроки доставки:")
+    lines.append("\nСроки:")
     for country, term in COMPANY_DATA["delivery_terms"].items():
         lines.append(f"  {country}: {term}")
 
     if show_commission:
         lines.append(f"\nКомиссия: {COMPANY_DATA['commission_text']}")
     else:
-        lines.append("\nКомиссию не упоминать — клиент не спрашивал.")
+        lines.append("\nКомиссию не упоминать.")
 
-    lines.append("\nПодходящие автомобили:")
+    lines.append("\nАвтомобили из базы:")
     if cars:
         for car in cars:
-            approx_rub = int(car["price_usd"] * (usd_rate + 2))
+            approx = int(car["price_usd"] * (usd_rate + 2))
             lines.append(
                 f"  • {car['brand']} {car['model']} {car['year']} | "
-                f"{car['power_hp']} л.с. | ~{approx_rub:,} ₽ цена авто | "
-                f"{'✅ до 160 л.с.' if car['is_under_160_hp'] else '⚠️ выше 160 л.с.'} | "
-                f"{car['url']} | {car['comment']}"
+                f"{car['power_hp']} л.с. | ~{approx:,} ₽ | "
+                f"{'✅ до 160' if car['is_under_160_hp'] else '⚠️ выше 160'} | "
+                f"{car['comment']}"
             )
     else:
-        lines.append("  Подходящих авто в базе не найдено. Предложи связаться с менеджером.")
+        lines.append("  Подходящих авто не найдено. Предложи связаться с менеджером.")
 
-    lines.append(f"\nМенеджер: {COMPANY_DATA['manager_name']} — {COMPANY_DATA['manager_telegram']}")
+    lines.append(f"\nМенеджер: {COMPANY_DATA['manager_telegram']}")
     return "\n".join(lines)
 
 
 # -----------------------------
-# УВЕДОМЛЕНИЕ МЕНЕДЖЕРАМ
+# УВЕДОМЛЕНИЯ МЕНЕДЖЕРАМ
 # -----------------------------
 async def notify_managers(bot: Bot, name: str, phone: str, tg_id: int, username: str):
     text = (
         f"🔥 Новый лид!\n\n"
         f"👤 {name}\n"
         f"📱 {phone}\n"
-        f"💬 @{username if username else 'нет username'}\n"
+        f"💬 @{username if username else 'нет'}\n"
         f"🆔 {tg_id}"
     )
     for mid in MANAGER_IDS:
         try:
             await bot.send_message(chat_id=mid, text=text)
         except Exception as e:
-            logging.error(f"Ошибка уведомления менеджеру {mid}: {e}")
+            logging.error(f"Ошибка уведомления {mid}: {e}")
 
 
 # -----------------------------
@@ -493,11 +533,9 @@ async def get_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     name = update.message.text.strip()
     user_profiles[user_id] = {"name": name, "phone": None}
     user_histories[user_id] = []
-
     await update.message.reply_text(
         f"{name}, приятно познакомиться! 🤝\n\n"
-        f"Оставь номер телефона — менеджер сможет связаться с тобой "
-        f"когда дойдёт до конкретики.",
+        f"Оставь номер телефона — менеджер сможет связаться с тобой когда дойдёт до конкретики.",
         reply_markup=phone_keyboard()
     )
     return GET_PHONE
@@ -517,21 +555,20 @@ async def get_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if not phone:
         await update.message.reply_text(
-            f"{name}, без номера не получится передать тебя менеджеру когда придёт время 🙂\n\n"
-            f"Нажми кнопку ниже 👇",
+            f"{name}, без номера не получится передать тебя менеджеру когда придёт время 🙂\n\nНажми кнопку ниже 👇",
             reply_markup=phone_keyboard()
         )
         return GET_PHONE
 
     user_profiles[user_id]["phone"] = phone
-    logging.info(f"Новый лид | {name} | {phone} | @{username} | {user_id}")
+    logging.info(f"Лид | {name} | {phone} | @{username} | {user_id}")
     await notify_managers(context.bot, name, phone, user_id, username)
 
     await update.message.reply_text(
         f"Отлично, {name}!\n\n"
-        f"Пиши что ищешь — марку, модель, бюджет, страну. "
-        f"Например: «кроссовер из Китая до 3 млн и до 160 сил».\n\n"
-        f"Могу сразу рассчитать стоимость под ключ по актуальному курсу ЦБ 👇",
+        f"Пиши что ищешь — марку, модель, бюджет, страну.\n"
+        f"Например: «Mazda CX-5 из Китая» или «кроссовер до 3 млн и до 160 сил».\n\n"
+        f"Могу сразу рассчитать стоимость под ключ 👇",
         reply_markup=main_keyboard()
     )
     return CHAT
@@ -542,9 +579,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if user_text == "📞 Связаться с менеджером":
         await update.message.reply_text(
-            "Передаю тебя менеджеру Евгению 💪\n\n"
-            "Он сделает точный расчёт и подберёт авто под тебя.\n\n"
-            "Telegram: @superluxxx",
+            "Передаю тебя менеджеру Евгению 💪\n\nТелефон: @superluxxx",
             reply_markup=main_keyboard()
         )
         return CHAT
@@ -553,7 +588,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "🚗 Подобрать авто": "Помоги подобрать автомобиль для пригона. Покажи варианты и ориентир по цене.",
         "💰 Рассчитать стоимость": "Рассчитай стоимость под ключ для подходящего авто из базы.",
         "⚡ До 160 л.с.": "Покажи варианты авто до 160 л.с. и рассчитай стоимость под ключ.",
-        "🌍 Из каких стран везёте?": "Из каких стран вы привозите автомобили и какие особенности?",
+        "🌍 Из каких стран везёте?": "Из каких стран вы привозите автомобили?",
         "⏱ Сроки доставки": "Какие сроки доставки по разным направлениям?",
     }
     llm_input = quick_map.get(user_text, user_text)
@@ -567,17 +602,34 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     usd_rate = await get_usd_rate()
 
-    # Если клиент просит расчёт — считаем для первого подходящего авто
+    # Расчёт стоимости — ищем конкретную машину в запросе
     if wants_calc(llm_input):
         budget = extract_budget(llm_input)
         countries = detect_countries(llm_input)
         under_160 = detect_under_160(llm_input)
+        year_override = extract_year(llm_input)
+
         cars = search_cars(llm_input, budget, countries, under_160, usd_rate)
         if cars:
             car = cars[0]
-            calc = await calc_total(car, usd_rate)
-            calc_text = format_calc(car, calc)
-            await update.message.reply_text(calc_text, reply_markup=main_keyboard())
+            # Если клиент указал конкретный год — используем его
+            year = year_override if year_override else car["year"]
+            calc = await calc_total(
+                price_usd=car["price_usd"],
+                engine_cc=car["engine_cc"],
+                power_hp=car["power_hp"],
+                year=year,
+                usd_rate=usd_rate
+            )
+            label = f"{car['brand']} {car['model']} {year}"
+            await update.message.reply_text(format_calc(label, calc), reply_markup=main_keyboard())
+            return CHAT
+        else:
+            await update.message.reply_text(
+                "Не нашёл подходящей машины в базе под этот запрос.\n\n"
+                "Напиши марку и модель — или свяжись с менеджером для индивидуального расчёта: @superluxxx",
+                reply_markup=main_keyboard()
+            )
             return CHAT
 
     user_histories.setdefault(user_id, [])
@@ -596,11 +648,9 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             temperature=0.35,
             max_tokens=600,
         )
-
         reply = response.choices[0].message.content.strip()
         if not reply:
             reply = "Напиши что именно ищешь — марку, модель, бюджет или страну."
-
         user_histories[user_id].append({"role": "assistant", "content": reply})
         await update.message.reply_text(reply, reply_markup=main_keyboard())
 
