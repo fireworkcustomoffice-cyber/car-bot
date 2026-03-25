@@ -33,7 +33,18 @@ KNOWN_CARS: Dict[str, Dict] = {
     "audi a6": {"brand": "Audi", "model": "A6", "engine_cc": 2000, "power_hp": 204, "price_usd": 38000},
     "ауди а6": {"brand": "Audi", "model": "A6", "engine_cc": 2000, "power_hp": 204, "price_usd": 38000},
     "а6": {"brand": "Audi", "model": "A6", "engine_cc": 2000, "power_hp": 204, "price_usd": 38000},
-    "audi q3": {"brand": "Audi", "model": "Q3", "engine_cc": 1500, "power_hp": 150, "price_usd": 25000},
+    "audi q3": {"brand": "Audi", "model": "Q3", "engine_cc": 1500, "power_hp": 150, "price_usd": 25000},"ауди q3": {"brand": "Audi", "model": "Q3", "engine_cc": 1500, "power_hp": 150, "price_usd": 25000},
+    "ку3": {"brand": "Audi", "model": "Q3", "engine_cc": 1500, "power_hp": 150, "price_usd": 25000},
+    "q3": {"brand": "Audi", "model": "Q3", "engine_cc": 1500, "power_hp": 150, "price_usd": 25000},
+    "ауди ку3": {"brand": "Audi", "model": "Q3", "engine_cc": 1500, "power_hp": 150, "price_usd": 25000},
+    "ку5": {"brand": "Audi", "model": "Q5", "engine_cc": 2000, "power_hp": 204, "price_usd": 42000},
+    "q5": {"brand": "Audi", "model": "Q5", "engine_cc": 2000, "power_hp": 204, "price_usd": 42000},
+    "ку7": {"brand": "Audi", "model": "Q7", "engine_cc": 3000, "power_hp": 249, "price_usd": 58000},
+    "q7": {"brand": "Audi", "model": "Q7", "engine_cc": 3000, "power_hp": 249, "price_usd": 58000},
+    "х5": {"brand": "BMW", "model": "X5", "engine_cc": 3000, "power_hp": 249, "price_usd": 52000},
+    "х3": {"brand": "BMW", "model": "X3", "engine_cc": 2000, "power_hp": 184, "price_usd": 38000},
+    "х6": {"brand": "BMW", "model": "X6", "engine_cc": 3000, "power_hp": 249, "price_usd": 55000},
+    "х7": {"brand": "BMW", "model": "X7", "engine_cc": 3000, "power_hp": 340, "price_usd": 75000},
     "audi q5": {"brand": "Audi", "model": "Q5", "engine_cc": 2000, "power_hp": 204, "price_usd": 42000},
     "ауди q5": {"brand": "Audi", "model": "Q5", "engine_cc": 2000, "power_hp": 204, "price_usd": 42000},
     "audi q7": {"brand": "Audi", "model": "Q7", "engine_cc": 3000, "power_hp": 249, "price_usd": 58000},
@@ -320,13 +331,17 @@ def find_car(text: str) -> Optional[Dict]:
 
 def needs_calc(text: str) -> bool:
     t = normalize(text)
-    return any(w in t for w in [
+    calc_words = [
         "посчитай", "рассчитай", "посчитать", "рассчитать",
         "под ключ", "сколько стоит", "сколько будет стоить",
         "сколько выйдет", "во сколько обойдётся", "во сколько обойдется",
         "расчёт", "расчет", "цена под ключ", "стоимость под ключ",
-        "сколько стоит привезти",
-    ])
+        "сколько стоит привезти", "почём", "почем",
+    ]
+    if any(w in t for w in calc_words):
+        return True
+    # Если назвал конкретное авто — тоже считаем
+    return find_car(t) is not None
 
 def needs_manager(text: str) -> bool:
     t = normalize(text)
