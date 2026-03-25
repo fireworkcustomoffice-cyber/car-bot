@@ -17,259 +17,194 @@ TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
 MANAGER_IDS = [7328478138, 295158168]
 
-COMPANY_DATA: Dict[str, Any] = {
-    "name": "CARFIRE",
-    "manager_name": "Евгений",
-    "manager_telegram": "@superluxxx",
-    "main_directions": ["Китай", "США"],
-    "extra_directions": ["Европа", "Канада", "Япония", "Корея"],
-    "commission_rub": 90000,
-    "hidden_margin_rub": 200000,
-    "commission_text": "Наша комиссия — 90 000 ₽. Включает полное сопровождение сделки.",
-    "logistics_usd": 2500,
-    "china_processing_usd": 1700,
-    "transfer_commission_pct": 0.02,
-    "sbkts_epts_rus_rub": 75000,
-    "prepayment_policy": "По ряду вариантов можем работать без полной предоплаты.",
-    "delivery_terms": {
-        "Китай": "3–6 недель",
-        "США": "6–10 недель",
-        "Европа": "Индивидуально",
-        "Канада": "Индивидуально",
-        "Япония": "Индивидуально",
-        "Корея": "Индивидуально",
-    },
-    "lead_handoff_triggers": [
-        "хочу купить", "готов купить", "нужен точный расчет", "нужен точный расчёт",
-        "давай оформлять", "оформить заявку", "готов к покупке", "как оформить",
-    ],
-}
-
-CARS_DATABASE: List[Dict[str, Any]] = [
-    {"brand": "Mazda", "model": "CX-5", "year": 2025, "country": "Китай",
-     "power_hp": 155, "engine_cc": 1500, "price_usd": 18000,
-     "is_under_160_hp": True, "is_available": True, "priority": True,
-     "url": "https://che168.com", "comment": "Проходной кроссовер до 160 л.с."},
-    {"brand": "Volkswagen", "model": "Tiguan L", "year": 2024, "country": "Китай",
-     "power_hp": 160, "engine_cc": 1400, "price_usd": 20000,
-     "is_under_160_hp": True, "is_available": True, "priority": True,
-     "url": "https://che168.com", "comment": "Семейный кроссовер с хорошей ликвидностью."},
-    {"brand": "Toyota", "model": "Camry", "year": 2024, "country": "Китай",
-     "power_hp": 173, "engine_cc": 2000, "price_usd": 22000,
-     "is_under_160_hp": False, "is_available": True, "priority": False,
-     "url": "https://che168.com", "comment": "Популярная модель, выше 160 л.с."},
-    {"brand": "Haval", "model": "H6", "year": 2025, "country": "Китай",
-     "power_hp": 150, "engine_cc": 1500, "price_usd": 15000,
-     "is_under_160_hp": True, "is_available": True, "priority": True,
-     "url": "https://che168.com", "comment": "Бюджетный кроссовер с хорошим оснащением."},
-    {"brand": "Li Auto", "model": "L6", "year": 2024, "country": "Китай",
-     "power_hp": 330, "engine_cc": 1500, "price_usd": 32000,
-     "is_under_160_hp": False, "is_available": True, "priority": False,
-     "url": "https://che168.com", "comment": "Премиальный гибрид."},
-]
-
 KNOWN_CARS: Dict[str, Dict] = {
-    "audi a1": {"brand": "Audi", "model": "A1", "engine_cc": 1000, "power_hp": 116, "price_usd": 18000},
-    "audi a3": {"brand": "Audi", "model": "A3", "engine_cc": 1400, "power_hp": 150, "price_usd": 27000},
-    "ауди а3": {"brand": "Audi", "model": "A3", "engine_cc": 1400, "power_hp": 150, "price_usd": 27000},
-    "ауди а 3": {"brand": "Audi", "model": "A3", "engine_cc": 1400, "power_hp": 150, "price_usd": 27000},
-    "audi a 3": {"brand": "Audi", "model": "A3", "engine_cc": 1400, "power_hp": 150, "price_usd": 27000},
-    "a3": {"brand": "Audi", "model": "A3", "engine_cc": 1400, "power_hp": 150, "price_usd": 27000},
-    "а3": {"brand": "Audi", "model": "A3", "engine_cc": 1400, "power_hp": 150, "price_usd": 27000},
-    "audi a4": {"brand": "Audi", "model": "A4", "engine_cc": 2000, "power_hp": 190, "price_usd": 35000},
-    "ауди а4": {"brand": "Audi", "model": "A4", "engine_cc": 2000, "power_hp": 190, "price_usd": 35000},
-    "а4": {"brand": "Audi", "model": "A4", "engine_cc": 2000, "power_hp": 190, "price_usd": 35000},
-    "audi a5": {"brand": "Audi", "model": "A5", "engine_cc": 2000, "power_hp": 190, "price_usd": 40000},
-    "ауди а5": {"brand": "Audi", "model": "A5", "engine_cc": 2000, "power_hp": 190, "price_usd": 40000},
-    "а5": {"brand": "Audi", "model": "A5", "engine_cc": 2000, "power_hp": 190, "price_usd": 40000},
-    "audi a6": {"brand": "Audi", "model": "A6", "engine_cc": 2000, "power_hp": 204, "price_usd": 45000},
-    "ауди а6": {"brand": "Audi", "model": "A6", "engine_cc": 2000, "power_hp": 204, "price_usd": 45000},
-    "а6": {"brand": "Audi", "model": "A6", "engine_cc": 2000, "power_hp": 204, "price_usd": 45000},
-    "audi a7": {"brand": "Audi", "model": "A7", "engine_cc": 3000, "power_hp": 340, "price_usd": 65000},
-    "audi a8": {"brand": "Audi", "model": "A8", "engine_cc": 3000, "power_hp": 340, "price_usd": 85000},
-    "audi q3": {"brand": "Audi", "model": "Q3", "engine_cc": 1500, "power_hp": 150, "price_usd": 32000},
-    "ауди q3": {"brand": "Audi", "model": "Q3", "engine_cc": 1500, "power_hp": 150, "price_usd": 32000},
-    "audi q5": {"brand": "Audi", "model": "Q5", "engine_cc": 2000, "power_hp": 204, "price_usd": 50000},
-    "ауди q5": {"brand": "Audi", "model": "Q5", "engine_cc": 2000, "power_hp": 204, "price_usd": 50000},
-    "audi q7": {"brand": "Audi", "model": "Q7", "engine_cc": 3000, "power_hp": 249, "price_usd": 70000},
-    "ауди q7": {"brand": "Audi", "model": "Q7", "engine_cc": 3000, "power_hp": 249, "price_usd": 70000},
-    "audi q8": {"brand": "Audi", "model": "Q8", "engine_cc": 3000, "power_hp": 340, "price_usd": 90000},
-    "bmw 1": {"brand": "BMW", "model": "1 Series", "engine_cc": 1500, "power_hp": 140, "price_usd": 22000},
-    "бмв 1": {"brand": "BMW", "model": "1 Series", "engine_cc": 1500, "power_hp": 140, "price_usd": 22000},
-    "bmw 3": {"brand": "BMW", "model": "3 Series", "engine_cc": 2000, "power_hp": 184, "price_usd": 35000},
-    "бмв 3": {"brand": "BMW", "model": "3 Series", "engine_cc": 2000, "power_hp": 184, "price_usd": 35000},
-    "bmw 5": {"brand": "BMW", "model": "5 Series", "engine_cc": 2000, "power_hp": 190, "price_usd": 50000},
-    "бмв 5": {"brand": "BMW", "model": "5 Series", "engine_cc": 2000, "power_hp": 190, "price_usd": 50000},
-    "bmw 7": {"brand": "BMW", "model": "7 Series", "engine_cc": 3000, "power_hp": 340, "price_usd": 85000},
-    "бмв 7": {"brand": "BMW", "model": "7 Series", "engine_cc": 3000, "power_hp": 340, "price_usd": 85000},
-    "bmw x1": {"brand": "BMW", "model": "X1", "engine_cc": 1500, "power_hp": 136, "price_usd": 28000},
-    "бмв х1": {"brand": "BMW", "model": "X1", "engine_cc": 1500, "power_hp": 136, "price_usd": 28000},
-    "bmw x3": {"brand": "BMW", "model": "X3", "engine_cc": 2000, "power_hp": 184, "price_usd": 45000},
-    "бмв х3": {"brand": "BMW", "model": "X3", "engine_cc": 2000, "power_hp": 184, "price_usd": 45000},
-    "bmw x5": {"brand": "BMW", "model": "X5", "engine_cc": 3000, "power_hp": 249, "price_usd": 60000},
-    "бмв х5": {"brand": "BMW", "model": "X5", "engine_cc": 3000, "power_hp": 249, "price_usd": 60000},
-    "bmw x6": {"brand": "BMW", "model": "X6", "engine_cc": 3000, "power_hp": 249, "price_usd": 65000},
-    "бмв х6": {"brand": "BMW", "model": "X6", "engine_cc": 3000, "power_hp": 249, "price_usd": 65000},
-    "bmw x7": {"brand": "BMW", "model": "X7", "engine_cc": 3000, "power_hp": 340, "price_usd": 90000},
-    "бмв х7": {"brand": "BMW", "model": "X7", "engine_cc": 3000, "power_hp": 340, "price_usd": 90000},
-    "mercedes a": {"brand": "Mercedes", "model": "A-Class", "engine_cc": 1300, "power_hp": 136, "price_usd": 25000},
-    "мерседес а": {"brand": "Mercedes", "model": "A-Class", "engine_cc": 1300, "power_hp": 136, "price_usd": 25000},
-    "mercedes c": {"brand": "Mercedes", "model": "C-Class", "engine_cc": 1500, "power_hp": 170, "price_usd": 38000},
-    "мерседес с": {"brand": "Mercedes", "model": "C-Class", "engine_cc": 1500, "power_hp": 170, "price_usd": 38000},
-    "мерс с": {"brand": "Mercedes", "model": "C-Class", "engine_cc": 1500, "power_hp": 170, "price_usd": 38000},
-    "мерс c": {"brand": "Mercedes", "model": "C-Class", "engine_cc": 1500, "power_hp": 170, "price_usd": 38000},
-    "mercedes e": {"brand": "Mercedes", "model": "E-Class", "engine_cc": 2000, "power_hp": 197, "price_usd": 55000},
-    "мерседес е": {"brand": "Mercedes", "model": "E-Class", "engine_cc": 2000, "power_hp": 197, "price_usd": 55000},
-    "мерс е": {"brand": "Mercedes", "model": "E-Class", "engine_cc": 2000, "power_hp": 197, "price_usd": 55000},
-    "мерс e": {"brand": "Mercedes", "model": "E-Class", "engine_cc": 2000, "power_hp": 197, "price_usd": 55000},
-    "mercedes s": {"brand": "Mercedes", "model": "S-Class", "engine_cc": 3000, "power_hp": 340, "price_usd": 100000},
-    "mercedes glc": {"brand": "Mercedes", "model": "GLC", "engine_cc": 2000, "power_hp": 204, "price_usd": 55000},
-    "mercedes gle": {"brand": "Mercedes", "model": "GLE", "engine_cc": 3000, "power_hp": 330, "price_usd": 80000},
-    "mercedes gls": {"brand": "Mercedes", "model": "GLS", "engine_cc": 3000, "power_hp": 330, "price_usd": 95000},
-    "mercedes g": {"brand": "Mercedes", "model": "G-Class", "engine_cc": 4000, "power_hp": 422, "price_usd": 130000},
-    "гелендваген": {"brand": "Mercedes", "model": "G-Class", "engine_cc": 4000, "power_hp": 422, "price_usd": 130000},
-    "toyota camry": {"brand": "Toyota", "model": "Camry", "engine_cc": 2000, "power_hp": 173, "price_usd": 22000},
-    "camry": {"brand": "Toyota", "model": "Camry", "engine_cc": 2000, "power_hp": 173, "price_usd": 22000},
-    "камри": {"brand": "Toyota", "model": "Camry", "engine_cc": 2000, "power_hp": 173, "price_usd": 22000},
-    "toyota rav4": {"brand": "Toyota", "model": "RAV4", "engine_cc": 2000, "power_hp": 175, "price_usd": 28000},
-    "rav4": {"brand": "Toyota", "model": "RAV4", "engine_cc": 2000, "power_hp": 175, "price_usd": 28000},
-    "рав4": {"brand": "Toyota", "model": "RAV4", "engine_cc": 2000, "power_hp": 175, "price_usd": 28000},
-    "toyota land cruiser": {"brand": "Toyota", "model": "Land Cruiser", "engine_cc": 3500, "power_hp": 275, "price_usd": 70000},
-    "land cruiser": {"brand": "Toyota", "model": "Land Cruiser", "engine_cc": 3500, "power_hp": 275, "price_usd": 70000},
-    "ленд крузер": {"brand": "Toyota", "model": "Land Cruiser", "engine_cc": 3500, "power_hp": 275, "price_usd": 70000},
-    "крузак": {"brand": "Toyota", "model": "Land Cruiser", "engine_cc": 3500, "power_hp": 275, "price_usd": 70000},
-    "toyota highlander": {"brand": "Toyota", "model": "Highlander", "engine_cc": 2500, "power_hp": 238, "price_usd": 40000},
-    "highlander": {"brand": "Toyota", "model": "Highlander", "engine_cc": 2500, "power_hp": 238, "price_usd": 40000},
-    "хайлендер": {"brand": "Toyota", "model": "Highlander", "engine_cc": 2500, "power_hp": 238, "price_usd": 40000},
-    "toyota corolla": {"brand": "Toyota", "model": "Corolla", "engine_cc": 1600, "power_hp": 122, "price_usd": 18000},
-    "corolla": {"brand": "Toyota", "model": "Corolla", "engine_cc": 1600, "power_hp": 122, "price_usd": 18000},
-    "королла": {"brand": "Toyota", "model": "Corolla", "engine_cc": 1600, "power_hp": 122, "price_usd": 18000},
-    "lexus rx": {"brand": "Lexus", "model": "RX", "engine_cc": 2000, "power_hp": 238, "price_usd": 45000},
-    "лексус rx": {"brand": "Lexus", "model": "RX", "engine_cc": 2000, "power_hp": 238, "price_usd": 45000},
-    "лексус рх": {"brand": "Lexus", "model": "RX", "engine_cc": 2000, "power_hp": 238, "price_usd": 45000},
-    "lexus lx": {"brand": "Lexus", "model": "LX", "engine_cc": 3500, "power_hp": 415, "price_usd": 90000},
-    "лексус lx": {"brand": "Lexus", "model": "LX", "engine_cc": 3500, "power_hp": 415, "price_usd": 90000},
-    "lexus es": {"brand": "Lexus", "model": "ES", "engine_cc": 2500, "power_hp": 218, "price_usd": 35000},
-    "лексус es": {"brand": "Lexus", "model": "ES", "engine_cc": 2500, "power_hp": 218, "price_usd": 35000},
-    "lexus gx": {"brand": "Lexus", "model": "GX", "engine_cc": 4000, "power_hp": 296, "price_usd": 60000},
-    "volkswagen passat": {"brand": "Volkswagen", "model": "Passat", "engine_cc": 2000, "power_hp": 150, "price_usd": 25000},
-    "пассат": {"brand": "Volkswagen", "model": "Passat", "engine_cc": 2000, "power_hp": 150, "price_usd": 25000},
-    "volkswagen tiguan": {"brand": "Volkswagen", "model": "Tiguan", "engine_cc": 1400, "power_hp": 150, "price_usd": 28000},
-    "тигуан": {"brand": "Volkswagen", "model": "Tiguan", "engine_cc": 1400, "power_hp": 150, "price_usd": 28000},
-    "volkswagen golf": {"brand": "Volkswagen", "model": "Golf", "engine_cc": 1400, "power_hp": 150, "price_usd": 22000},
-    "гольф": {"brand": "Volkswagen", "model": "Golf", "engine_cc": 1400, "power_hp": 150, "price_usd": 22000},
-    "volkswagen polo": {"brand": "Volkswagen", "model": "Polo", "engine_cc": 1000, "power_hp": 110, "price_usd": 16000},
-    "поло": {"brand": "Volkswagen", "model": "Polo", "engine_cc": 1000, "power_hp": 110, "price_usd": 16000},
-    "volkswagen touareg": {"brand": "Volkswagen", "model": "Touareg", "engine_cc": 3000, "power_hp": 249, "price_usd": 55000},
-    "туарег": {"brand": "Volkswagen", "model": "Touareg", "engine_cc": 3000, "power_hp": 249, "price_usd": 55000},
-    "hyundai tucson": {"brand": "Hyundai", "model": "Tucson", "engine_cc": 1600, "power_hp": 150, "price_usd": 22000},
-    "туксон": {"brand": "Hyundai", "model": "Tucson", "engine_cc": 1600, "power_hp": 150, "price_usd": 22000},
-    "hyundai palisade": {"brand": "Hyundai", "model": "Palisade", "engine_cc": 2500, "power_hp": 196, "price_usd": 38000},
-    "палисейд": {"brand": "Hyundai", "model": "Palisade", "engine_cc": 2500, "power_hp": 196, "price_usd": 38000},
-    "hyundai santafe": {"brand": "Hyundai", "model": "Santa Fe", "engine_cc": 2000, "power_hp": 180, "price_usd": 30000},
-    "санта фе": {"brand": "Hyundai", "model": "Santa Fe", "engine_cc": 2000, "power_hp": 180, "price_usd": 30000},
-    "hyundai sonata": {"brand": "Hyundai", "model": "Sonata", "engine_cc": 2000, "power_hp": 150, "price_usd": 22000},
-    "соната": {"brand": "Hyundai", "model": "Sonata", "engine_cc": 2000, "power_hp": 150, "price_usd": 22000},
-    "kia sportage": {"brand": "Kia", "model": "Sportage", "engine_cc": 1600, "power_hp": 150, "price_usd": 22000},
-    "спортейдж": {"brand": "Kia", "model": "Sportage", "engine_cc": 1600, "power_hp": 150, "price_usd": 22000},
-    "kia sorento": {"brand": "Kia", "model": "Sorento", "engine_cc": 2500, "power_hp": 196, "price_usd": 35000},
-    "соренто": {"brand": "Kia", "model": "Sorento", "engine_cc": 2500, "power_hp": 196, "price_usd": 35000},
-    "kia stinger": {"brand": "Kia", "model": "Stinger", "engine_cc": 2000, "power_hp": 255, "price_usd": 30000},
-    "стингер": {"brand": "Kia", "model": "Stinger", "engine_cc": 2000, "power_hp": 255, "price_usd": 30000},
-    "kia k5": {"brand": "Kia", "model": "K5", "engine_cc": 1600, "power_hp": 180, "price_usd": 22000},
-    "kia telluride": {"brand": "Kia", "model": "Telluride", "engine_cc": 3500, "power_hp": 291, "price_usd": 40000},
-    "mazda cx-5": {"brand": "Mazda", "model": "CX-5", "engine_cc": 1500, "power_hp": 155, "price_usd": 18000},
-    "мазда cx-5": {"brand": "Mazda", "model": "CX-5", "engine_cc": 1500, "power_hp": 155, "price_usd": 18000},
-    "mazda cx5": {"brand": "Mazda", "model": "CX-5", "engine_cc": 1500, "power_hp": 155, "price_usd": 18000},
-    "мазда сх5": {"brand": "Mazda", "model": "CX-5", "engine_cc": 1500, "power_hp": 155, "price_usd": 18000},
-    "mazda cx-9": {"brand": "Mazda", "model": "CX-9", "engine_cc": 2500, "power_hp": 228, "price_usd": 32000},
-    "mazda 6": {"brand": "Mazda", "model": "6", "engine_cc": 2000, "power_hp": 165, "price_usd": 20000},
-    "мазда 6": {"brand": "Mazda", "model": "6", "engine_cc": 2000, "power_hp": 165, "price_usd": 20000},
-    "мазда": {"brand": "Mazda", "model": "CX-5", "engine_cc": 1500, "power_hp": 155, "price_usd": 18000},
-    "haval h6": {"brand": "Haval", "model": "H6", "engine_cc": 1500, "power_hp": 150, "price_usd": 15000},
-    "haval h9": {"brand": "Haval", "model": "H9", "engine_cc": 2000, "power_hp": 218, "price_usd": 28000},
-    "geely atlas": {"brand": "Geely", "model": "Atlas", "engine_cc": 1500, "power_hp": 150, "price_usd": 14000},
-    "chery tiggo": {"brand": "Chery", "model": "Tiggo 7", "engine_cc": 1500, "power_hp": 150, "price_usd": 14000},
-    "byd han": {"brand": "BYD", "model": "Han", "engine_cc": 1500, "power_hp": 218, "price_usd": 25000},
-    "byd seal": {"brand": "BYD", "model": "Seal", "engine_cc": 1500, "power_hp": 313, "price_usd": 22000},
-    "li auto l6": {"brand": "Li Auto", "model": "L6", "engine_cc": 1500, "power_hp": 330, "price_usd": 32000},
-    "li auto l9": {"brand": "Li Auto", "model": "L9", "engine_cc": 1500, "power_hp": 449, "price_usd": 50000},
-    "exeed": {"brand": "Exeed", "model": "TXL", "engine_cc": 1500, "power_hp": 150, "price_usd": 16000},
-    "omoda": {"brand": "Omoda", "model": "C5", "engine_cc": 1600, "power_hp": 147, "price_usd": 15000},
-    "jaecoo": {"brand": "Jaecoo", "model": "J7", "engine_cc": 1500, "power_hp": 147, "price_usd": 16000},
-    "porsche cayenne": {"brand": "Porsche", "model": "Cayenne", "engine_cc": 3000, "power_hp": 340, "price_usd": 85000},
-    "кайен": {"brand": "Porsche", "model": "Cayenne", "engine_cc": 3000, "power_hp": 340, "price_usd": 85000},
-    "порше кайен": {"brand": "Porsche", "model": "Cayenne", "engine_cc": 3000, "power_hp": 340, "price_usd": 85000},
-    "porsche macan": {"brand": "Porsche", "model": "Macan", "engine_cc": 2000, "power_hp": 265, "price_usd": 60000},
-    "макан": {"brand": "Porsche", "model": "Macan", "engine_cc": 2000, "power_hp": 265, "price_usd": 60000},
-    "porsche panamera": {"brand": "Porsche", "model": "Panamera", "engine_cc": 3000, "power_hp": 330, "price_usd": 90000},
-    "range rover": {"brand": "Land Rover", "model": "Range Rover", "engine_cc": 3000, "power_hp": 350, "price_usd": 90000},
-    "рейндж ровер": {"brand": "Land Rover", "model": "Range Rover", "engine_cc": 3000, "power_hp": 350, "price_usd": 90000},
-    "range rover sport": {"brand": "Land Rover", "model": "Range Rover Sport", "engine_cc": 3000, "power_hp": 300, "price_usd": 70000},
-    "defender": {"brand": "Land Rover", "model": "Defender", "engine_cc": 2000, "power_hp": 300, "price_usd": 55000},
-    "дефендер": {"brand": "Land Rover", "model": "Defender", "engine_cc": 2000, "power_hp": 300, "price_usd": 55000},
-    "volvo xc90": {"brand": "Volvo", "model": "XC90", "engine_cc": 2000, "power_hp": 249, "price_usd": 60000},
-    "volvo xc60": {"brand": "Volvo", "model": "XC60", "engine_cc": 2000, "power_hp": 190, "price_usd": 45000},
-    "volvo xc40": {"brand": "Volvo", "model": "XC40", "engine_cc": 1500, "power_hp": 156, "price_usd": 35000},
-    "skoda octavia": {"brand": "Skoda", "model": "Octavia", "engine_cc": 1400, "power_hp": 150, "price_usd": 22000},
-    "октавия": {"brand": "Skoda", "model": "Octavia", "engine_cc": 1400, "power_hp": 150, "price_usd": 22000},
-    "skoda kodiaq": {"brand": "Skoda", "model": "Kodiaq", "engine_cc": 2000, "power_hp": 190, "price_usd": 32000},
-    "кодиак": {"brand": "Skoda", "model": "Kodiaq", "engine_cc": 2000, "power_hp": 190, "price_usd": 32000},
-    "nissan x-trail": {"brand": "Nissan", "model": "X-Trail", "engine_cc": 1500, "power_hp": 163, "price_usd": 25000},
-    "иксрейл": {"brand": "Nissan", "model": "X-Trail", "engine_cc": 1500, "power_hp": 163, "price_usd": 25000},
-    "nissan patrol": {"brand": "Nissan", "model": "Patrol", "engine_cc": 4000, "power_hp": 275, "price_usd": 55000},
-    "патрол": {"brand": "Nissan", "model": "Patrol", "engine_cc": 4000, "power_hp": 275, "price_usd": 55000},
-    "nissan qashqai": {"brand": "Nissan", "model": "Qashqai", "engine_cc": 1300, "power_hp": 140, "price_usd": 22000},
-    "кашкай": {"brand": "Nissan", "model": "Qashqai", "engine_cc": 1300, "power_hp": 140, "price_usd": 22000},
-    "honda cr-v": {"brand": "Honda", "model": "CR-V", "engine_cc": 1500, "power_hp": 193, "price_usd": 28000},
-    "honda pilot": {"brand": "Honda", "model": "Pilot", "engine_cc": 3500, "power_hp": 285, "price_usd": 38000},
-    "honda accord": {"brand": "Honda", "model": "Accord", "engine_cc": 1500, "power_hp": 192, "price_usd": 24000},
-    "аккорд": {"brand": "Honda", "model": "Accord", "engine_cc": 1500, "power_hp": 192, "price_usd": 24000},
-    "subaru outback": {"brand": "Subaru", "model": "Outback", "engine_cc": 2500, "power_hp": 175, "price_usd": 28000},
-    "аутбэк": {"brand": "Subaru", "model": "Outback", "engine_cc": 2500, "power_hp": 175, "price_usd": 28000},
-    "subaru forester": {"brand": "Subaru", "model": "Forester", "engine_cc": 2000, "power_hp": 150, "price_usd": 22000},
-    "форестер": {"brand": "Subaru", "model": "Forester", "engine_cc": 2000, "power_hp": 150, "price_usd": 22000},
-    "ford mustang": {"brand": "Ford", "model": "Mustang", "engine_cc": 5000, "power_hp": 450, "price_usd": 35000},
-    "мустанг": {"brand": "Ford", "model": "Mustang", "engine_cc": 5000, "power_hp": 450, "price_usd": 35000},
-    "ford explorer": {"brand": "Ford", "model": "Explorer", "engine_cc": 3000, "power_hp": 300, "price_usd": 40000},
-    "dodge charger": {"brand": "Dodge", "model": "Charger", "engine_cc": 5700, "power_hp": 370, "price_usd": 30000},
-    "dodge challenger": {"brand": "Dodge", "model": "Challenger", "engine_cc": 5700, "power_hp": 375, "price_usd": 30000},
-    "dodge durango": {"brand": "Dodge", "model": "Durango", "engine_cc": 3600, "power_hp": 290, "price_usd": 38000},
-    "jeep grand cherokee": {"brand": "Jeep", "model": "Grand Cherokee", "engine_cc": 3600, "power_hp": 290, "price_usd": 42000},
-    "гранд чероки": {"brand": "Jeep", "model": "Grand Cherokee", "engine_cc": 3600, "power_hp": 290, "price_usd": 42000},
-    "cadillac escalade": {"brand": "Cadillac", "model": "Escalade", "engine_cc": 6200, "power_hp": 420, "price_usd": 75000},
-    "эскалейд": {"brand": "Cadillac", "model": "Escalade", "engine_cc": 6200, "power_hp": 420, "price_usd": 75000},
-    "mitsubishi outlander": {"brand": "Mitsubishi", "model": "Outlander", "engine_cc": 2000, "power_hp": 145, "price_usd": 22000},
-    "аутлендер": {"brand": "Mitsubishi", "model": "Outlander", "engine_cc": 2000, "power_hp": 145, "price_usd": 22000},
-    "mitsubishi pajero": {"brand": "Mitsubishi", "model": "Pajero", "engine_cc": 3000, "power_hp": 178, "price_usd": 35000},
-    "паджеро": {"brand": "Mitsubishi", "model": "Pajero", "engine_cc": 3000, "power_hp": 178, "price_usd": 35000},
+    "audi a1": {"brand": "Audi", "model": "A1", "engine_cc": 1000, "power_hp": 116, "price_usd": 14000},
+    "audi a3": {"brand": "Audi", "model": "A3", "engine_cc": 1400, "power_hp": 150, "price_usd": 19000},
+    "ауди а3": {"brand": "Audi", "model": "A3", "engine_cc": 1400, "power_hp": 150, "price_usd": 19000},
+    "ауди а 3": {"brand": "Audi", "model": "A3", "engine_cc": 1400, "power_hp": 150, "price_usd": 19000},
+    "a3": {"brand": "Audi", "model": "A3", "engine_cc": 1400, "power_hp": 150, "price_usd": 19000},
+    "а3": {"brand": "Audi", "model": "A3", "engine_cc": 1400, "power_hp": 150, "price_usd": 19000},
+    "audi a4": {"brand": "Audi", "model": "A4", "engine_cc": 2000, "power_hp": 190, "price_usd": 28000},
+    "ауди а4": {"brand": "Audi", "model": "A4", "engine_cc": 2000, "power_hp": 190, "price_usd": 28000},
+    "а4": {"brand": "Audi", "model": "A4", "engine_cc": 2000, "power_hp": 190, "price_usd": 28000},
+    "audi a5": {"brand": "Audi", "model": "A5", "engine_cc": 2000, "power_hp": 190, "price_usd": 32000},
+    "ауди а5": {"brand": "Audi", "model": "A5", "engine_cc": 2000, "power_hp": 190, "price_usd": 32000},
+    "а5": {"brand": "Audi", "model": "A5", "engine_cc": 2000, "power_hp": 190, "price_usd": 32000},
+    "audi a6": {"brand": "Audi", "model": "A6", "engine_cc": 2000, "power_hp": 204, "price_usd": 38000},
+    "ауди а6": {"brand": "Audi", "model": "A6", "engine_cc": 2000, "power_hp": 204, "price_usd": 38000},
+    "а6": {"brand": "Audi", "model": "A6", "engine_cc": 2000, "power_hp": 204, "price_usd": 38000},
+    "audi q3": {"brand": "Audi", "model": "Q3", "engine_cc": 1500, "power_hp": 150, "price_usd": 25000},
+    "audi q5": {"brand": "Audi", "model": "Q5", "engine_cc": 2000, "power_hp": 204, "price_usd": 42000},
+    "ауди q5": {"brand": "Audi", "model": "Q5", "engine_cc": 2000, "power_hp": 204, "price_usd": 42000},
+    "audi q7": {"brand": "Audi", "model": "Q7", "engine_cc": 3000, "power_hp": 249, "price_usd": 58000},
+    "ауди q7": {"brand": "Audi", "model": "Q7", "engine_cc": 3000, "power_hp": 249, "price_usd": 58000},
+    "audi q8": {"brand": "Audi", "model": "Q8", "engine_cc": 3000, "power_hp": 340, "price_usd": 75000},
+    "bmw 1": {"brand": "BMW", "model": "1 Series", "engine_cc": 1500, "power_hp": 140, "price_usd": 18000},
+    "бмв 1": {"brand": "BMW", "model": "1 Series", "engine_cc": 1500, "power_hp": 140, "price_usd": 18000},
+    "bmw 3": {"brand": "BMW", "model": "3 Series", "engine_cc": 2000, "power_hp": 184, "price_usd": 30000},
+    "бмв 3": {"brand": "BMW", "model": "3 Series", "engine_cc": 2000, "power_hp": 184, "price_usd": 30000},
+    "bmw 5": {"brand": "BMW", "model": "5 Series", "engine_cc": 2000, "power_hp": 190, "price_usd": 42000},
+    "бмв 5": {"brand": "BMW", "model": "5 Series", "engine_cc": 2000, "power_hp": 190, "price_usd": 42000},
+    "bmw 7": {"brand": "BMW", "model": "7 Series", "engine_cc": 3000, "power_hp": 340, "price_usd": 70000},
+    "бмв 7": {"brand": "BMW", "model": "7 Series", "engine_cc": 3000, "power_hp": 340, "price_usd": 70000},
+    "bmw x1": {"brand": "BMW", "model": "X1", "engine_cc": 1500, "power_hp": 136, "price_usd": 22000},
+    "бмв х1": {"brand": "BMW", "model": "X1", "engine_cc": 1500, "power_hp": 136, "price_usd": 22000},
+    "bmw x3": {"brand": "BMW", "model": "X3", "engine_cc": 2000, "power_hp": 184, "price_usd": 38000},
+    "бмв х3": {"brand": "BMW", "model": "X3", "engine_cc": 2000, "power_hp": 184, "price_usd": 38000},
+    "bmw x5": {"brand": "BMW", "model": "X5", "engine_cc": 3000, "power_hp": 249, "price_usd": 52000},
+    "бмв х5": {"brand": "BMW", "model": "X5", "engine_cc": 3000, "power_hp": 249, "price_usd": 52000},
+    "bmw x6": {"brand": "BMW", "model": "X6", "engine_cc": 3000, "power_hp": 249, "price_usd": 55000},
+    "бмв х6": {"brand": "BMW", "model": "X6", "engine_cc": 3000, "power_hp": 249, "price_usd": 55000},
+    "bmw x7": {"brand": "BMW", "model": "X7", "engine_cc": 3000, "power_hp": 340, "price_usd": 75000},
+    "бмв х7": {"brand": "BMW", "model": "X7", "engine_cc": 3000, "power_hp": 340, "price_usd": 75000},
+    "mercedes c": {"brand": "Mercedes", "model": "C-Class", "engine_cc": 1500, "power_hp": 170, "price_usd": 32000},
+    "мерседес с": {"brand": "Mercedes", "model": "C-Class", "engine_cc": 1500, "power_hp": 170, "price_usd": 32000},
+    "мерс с": {"brand": "Mercedes", "model": "C-Class", "engine_cc": 1500, "power_hp": 170, "price_usd": 32000},
+    "мерс c": {"brand": "Mercedes", "model": "C-Class", "engine_cc": 1500, "power_hp": 170, "price_usd": 32000},
+    "mercedes e": {"brand": "Mercedes", "model": "E-Class", "engine_cc": 2000, "power_hp": 197, "price_usd": 45000},
+    "мерседес е": {"brand": "Mercedes", "model": "E-Class", "engine_cc": 2000, "power_hp": 197, "price_usd": 45000},
+    "мерс е": {"brand": "Mercedes", "model": "E-Class", "engine_cc": 2000, "power_hp": 197, "price_usd": 45000},
+    "mercedes s": {"brand": "Mercedes", "model": "S-Class", "engine_cc": 3000, "power_hp": 340, "price_usd": 85000},
+    "mercedes glc": {"brand": "Mercedes", "model": "GLC", "engine_cc": 2000, "power_hp": 204, "price_usd": 48000},
+    "mercedes gle": {"brand": "Mercedes", "model": "GLE", "engine_cc": 3000, "power_hp": 330, "price_usd": 68000},
+    "mercedes g": {"brand": "Mercedes", "model": "G-Class", "engine_cc": 4000, "power_hp": 422, "price_usd": 110000},
+    "гелендваген": {"brand": "Mercedes", "model": "G-Class", "engine_cc": 4000, "power_hp": 422, "price_usd": 110000},
+    "toyota camry": {"brand": "Toyota", "model": "Camry", "engine_cc": 2000, "power_hp": 173, "price_usd": 20000},
+    "camry": {"brand": "Toyota", "model": "Camry", "engine_cc": 2000, "power_hp": 173, "price_usd": 20000},
+    "камри": {"brand": "Toyota", "model": "Camry", "engine_cc": 2000, "power_hp": 173, "price_usd": 20000},
+    "toyota rav4": {"brand": "Toyota", "model": "RAV4", "engine_cc": 2000, "power_hp": 175, "price_usd": 24000},
+    "rav4": {"brand": "Toyota", "model": "RAV4", "engine_cc": 2000, "power_hp": 175, "price_usd": 24000},
+    "рав4": {"brand": "Toyota", "model": "RAV4", "engine_cc": 2000, "power_hp": 175, "price_usd": 24000},
+    "toyota land cruiser": {"brand": "Toyota", "model": "Land Cruiser", "engine_cc": 3500, "power_hp": 275, "price_usd": 60000},
+    "land cruiser": {"brand": "Toyota", "model": "Land Cruiser", "engine_cc": 3500, "power_hp": 275, "price_usd": 60000},
+    "ленд крузер": {"brand": "Toyota", "model": "Land Cruiser", "engine_cc": 3500, "power_hp": 275, "price_usd": 60000},
+    "крузак": {"brand": "Toyota", "model": "Land Cruiser", "engine_cc": 3500, "power_hp": 275, "price_usd": 60000},
+    "toyota highlander": {"brand": "Toyota", "model": "Highlander", "engine_cc": 2500, "power_hp": 238, "price_usd": 35000},
+    "хайлендер": {"brand": "Toyota", "model": "Highlander", "engine_cc": 2500, "power_hp": 238, "price_usd": 35000},
+    "toyota corolla": {"brand": "Toyota", "model": "Corolla", "engine_cc": 1600, "power_hp": 122, "price_usd": 15000},
+    "королла": {"brand": "Toyota", "model": "Corolla", "engine_cc": 1600, "power_hp": 122, "price_usd": 15000},
+    "lexus rx": {"brand": "Lexus", "model": "RX", "engine_cc": 2000, "power_hp": 238, "price_usd": 38000},
+    "лексус rx": {"brand": "Lexus", "model": "RX", "engine_cc": 2000, "power_hp": 238, "price_usd": 38000},
+    "лексус рх": {"brand": "Lexus", "model": "RX", "engine_cc": 2000, "power_hp": 238, "price_usd": 38000},
+    "lexus lx": {"brand": "Lexus", "model": "LX", "engine_cc": 3500, "power_hp": 415, "price_usd": 75000},
+    "лексус lx": {"brand": "Lexus", "model": "LX", "engine_cc": 3500, "power_hp": 415, "price_usd": 75000},
+    "lexus es": {"brand": "Lexus", "model": "ES", "engine_cc": 2500, "power_hp": 218, "price_usd": 30000},
+    "лексус es": {"brand": "Lexus", "model": "ES", "engine_cc": 2500, "power_hp": 218, "price_usd": 30000},
+    "volkswagen passat": {"brand": "Volkswagen", "model": "Passat", "engine_cc": 2000, "power_hp": 150, "price_usd": 20000},
+    "пассат": {"brand": "Volkswagen", "model": "Passat", "engine_cc": 2000, "power_hp": 150, "price_usd": 20000},
+    "volkswagen tiguan": {"brand": "Volkswagen", "model": "Tiguan", "engine_cc": 1400, "power_hp": 150, "price_usd": 22000},
+    "тигуан": {"brand": "Volkswagen", "model": "Tiguan", "engine_cc": 1400, "power_hp": 150, "price_usd": 22000},
+    "volkswagen golf": {"brand": "Volkswagen", "model": "Golf", "engine_cc": 1400, "power_hp": 150, "price_usd": 18000},
+    "гольф": {"brand": "Volkswagen", "model": "Golf", "engine_cc": 1400, "power_hp": 150, "price_usd": 18000},
+    "volkswagen touareg": {"brand": "Volkswagen", "model": "Touareg", "engine_cc": 3000, "power_hp": 249, "price_usd": 45000},
+    "туарег": {"brand": "Volkswagen", "model": "Touareg", "engine_cc": 3000, "power_hp": 249, "price_usd": 45000},
+    "hyundai tucson": {"brand": "Hyundai", "model": "Tucson", "engine_cc": 1600, "power_hp": 150, "price_usd": 18000},
+    "туксон": {"brand": "Hyundai", "model": "Tucson", "engine_cc": 1600, "power_hp": 150, "price_usd": 18000},
+    "hyundai palisade": {"brand": "Hyundai", "model": "Palisade", "engine_cc": 2500, "power_hp": 196, "price_usd": 32000},
+    "палисейд": {"brand": "Hyundai", "model": "Palisade", "engine_cc": 2500, "power_hp": 196, "price_usd": 32000},
+    "hyundai sonata": {"brand": "Hyundai", "model": "Sonata", "engine_cc": 2000, "power_hp": 150, "price_usd": 18000},
+    "соната": {"brand": "Hyundai", "model": "Sonata", "engine_cc": 2000, "power_hp": 150, "price_usd": 18000},
+    "kia sportage": {"brand": "Kia", "model": "Sportage", "engine_cc": 1600, "power_hp": 150, "price_usd": 18000},
+    "спортейдж": {"brand": "Kia", "model": "Sportage", "engine_cc": 1600, "power_hp": 150, "price_usd": 18000},
+    "kia sorento": {"brand": "Kia", "model": "Sorento", "engine_cc": 2500, "power_hp": 196, "price_usd": 28000},
+    "соренто": {"brand": "Kia", "model": "Sorento", "engine_cc": 2500, "power_hp": 196, "price_usd": 28000},
+    "kia stinger": {"brand": "Kia", "model": "Stinger", "engine_cc": 2000, "power_hp": 255, "price_usd": 25000},
+    "стингер": {"brand": "Kia", "model": "Stinger", "engine_cc": 2000, "power_hp": 255, "price_usd": 25000},
+    "mazda cx-5": {"brand": "Mazda", "model": "CX-5", "engine_cc": 1500, "power_hp": 155, "price_usd": 16000},
+    "мазда cx-5": {"brand": "Mazda", "model": "CX-5", "engine_cc": 1500, "power_hp": 155, "price_usd": 16000},
+    "mazda cx5": {"brand": "Mazda", "model": "CX-5", "engine_cc": 1500, "power_hp": 155, "price_usd": 16000},
+    "мазда": {"brand": "Mazda", "model": "CX-5", "engine_cc": 1500, "power_hp": 155, "price_usd": 16000},
+    "mazda 6": {"brand": "Mazda", "model": "6", "engine_cc": 2000, "power_hp": 165, "price_usd": 17000},
+    "мазда 6": {"brand": "Mazda", "model": "6", "engine_cc": 2000, "power_hp": 165, "price_usd": 17000},
+    "haval h6": {"brand": "Haval", "model": "H6", "engine_cc": 1500, "power_hp": 150, "price_usd": 13000},
+    "haval h9": {"brand": "Haval", "model": "H9", "engine_cc": 2000, "power_hp": 218, "price_usd": 24000},
+    "geely atlas": {"brand": "Geely", "model": "Atlas", "engine_cc": 1500, "power_hp": 150, "price_usd": 12000},
+    "чери тиго": {"brand": "Chery", "model": "Tiggo 7", "engine_cc": 1500, "power_hp": 150, "price_usd": 12000},
+    "chery tiggo": {"brand": "Chery", "model": "Tiggo 7", "engine_cc": 1500, "power_hp": 150, "price_usd": 12000},
+    "byd han": {"brand": "BYD", "model": "Han", "engine_cc": 1500, "power_hp": 218, "price_usd": 22000},
+    "byd seal": {"brand": "BYD", "model": "Seal", "engine_cc": 1500, "power_hp": 313, "price_usd": 20000},
+    "li auto l6": {"brand": "Li Auto", "model": "L6", "engine_cc": 1500, "power_hp": 330, "price_usd": 28000},
+    "omoda": {"brand": "Omoda", "model": "C5", "engine_cc": 1600, "power_hp": 147, "price_usd": 13000},
+    "jaecoo": {"brand": "Jaecoo", "model": "J7", "engine_cc": 1500, "power_hp": 147, "price_usd": 14000},
+    "porsche cayenne": {"brand": "Porsche", "model": "Cayenne", "engine_cc": 3000, "power_hp": 340, "price_usd": 72000},
+    "кайен": {"brand": "Porsche", "model": "Cayenne", "engine_cc": 3000, "power_hp": 340, "price_usd": 72000},
+    "порше кайен": {"brand": "Porsche", "model": "Cayenne", "engine_cc": 3000, "power_hp": 340, "price_usd": 72000},
+    "porsche macan": {"brand": "Porsche", "model": "Macan", "engine_cc": 2000, "power_hp": 265, "price_usd": 50000},
+    "макан": {"brand": "Porsche", "model": "Macan", "engine_cc": 2000, "power_hp": 265, "price_usd": 50000},
+    "range rover": {"brand": "Land Rover", "model": "Range Rover", "engine_cc": 3000, "power_hp": 350, "price_usd": 78000},
+    "рейндж ровер": {"brand": "Land Rover", "model": "Range Rover", "engine_cc": 3000, "power_hp": 350, "price_usd": 78000},
+    "defender": {"brand": "Land Rover", "model": "Defender", "engine_cc": 2000, "power_hp": 300, "price_usd": 48000},
+    "дефендер": {"brand": "Land Rover", "model": "Defender", "engine_cc": 2000, "power_hp": 300, "price_usd": 48000},
+    "volvo xc90": {"brand": "Volvo", "model": "XC90", "engine_cc": 2000, "power_hp": 249, "price_usd": 50000},
+    "volvo xc60": {"brand": "Volvo", "model": "XC60", "engine_cc": 2000, "power_hp": 190, "price_usd": 38000},
+    "skoda octavia": {"brand": "Skoda", "model": "Octavia", "engine_cc": 1400, "power_hp": 150, "price_usd": 18000},
+    "октавия": {"brand": "Skoda", "model": "Octavia", "engine_cc": 1400, "power_hp": 150, "price_usd": 18000},
+    "skoda kodiaq": {"brand": "Skoda", "model": "Kodiaq", "engine_cc": 2000, "power_hp": 190, "price_usd": 26000},
+    "кодиак": {"brand": "Skoda", "model": "Kodiaq", "engine_cc": 2000, "power_hp": 190, "price_usd": 26000},
+    "nissan patrol": {"brand": "Nissan", "model": "Patrol", "engine_cc": 4000, "power_hp": 275, "price_usd": 48000},
+    "патрол": {"brand": "Nissan", "model": "Patrol", "engine_cc": 4000, "power_hp": 275, "price_usd": 48000},
+    "nissan qashqai": {"brand": "Nissan", "model": "Qashqai", "engine_cc": 1300, "power_hp": 140, "price_usd": 18000},
+    "кашкай": {"brand": "Nissan", "model": "Qashqai", "engine_cc": 1300, "power_hp": 140, "price_usd": 18000},
+    "honda cr-v": {"brand": "Honda", "model": "CR-V", "engine_cc": 1500, "power_hp": 193, "price_usd": 22000},
+    "honda accord": {"brand": "Honda", "model": "Accord", "engine_cc": 1500, "power_hp": 192, "price_usd": 20000},
+    "аккорд": {"brand": "Honda", "model": "Accord", "engine_cc": 1500, "power_hp": 192, "price_usd": 20000},
+    "subaru outback": {"brand": "Subaru", "model": "Outback", "engine_cc": 2500, "power_hp": 175, "price_usd": 24000},
+    "аутбэк": {"brand": "Subaru", "model": "Outback", "engine_cc": 2500, "power_hp": 175, "price_usd": 24000},
+    "subaru forester": {"brand": "Subaru", "model": "Forester", "engine_cc": 2000, "power_hp": 150, "price_usd": 18000},
+    "форестер": {"brand": "Subaru", "model": "Forester", "engine_cc": 2000, "power_hp": 150, "price_usd": 18000},
+    "ford mustang": {"brand": "Ford", "model": "Mustang", "engine_cc": 5000, "power_hp": 450, "price_usd": 32000},
+    "мустанг": {"brand": "Ford", "model": "Mustang", "engine_cc": 5000, "power_hp": 450, "price_usd": 32000},
+    "ford explorer": {"brand": "Ford", "model": "Explorer", "engine_cc": 3000, "power_hp": 300, "price_usd": 35000},
+    "dodge charger": {"brand": "Dodge", "model": "Charger", "engine_cc": 5700, "power_hp": 370, "price_usd": 28000},
+    "dodge challenger": {"brand": "Dodge", "model": "Challenger", "engine_cc": 5700, "power_hp": 375, "price_usd": 28000},
+    "jeep grand cherokee": {"brand": "Jeep", "model": "Grand Cherokee", "engine_cc": 3600, "power_hp": 290, "price_usd": 35000},
+    "гранд чероки": {"brand": "Jeep", "model": "Grand Cherokee", "engine_cc": 3600, "power_hp": 290, "price_usd": 35000},
+    "cadillac escalade": {"brand": "Cadillac", "model": "Escalade", "engine_cc": 6200, "power_hp": 420, "price_usd": 65000},
+    "эскалейд": {"brand": "Cadillac", "model": "Escalade", "engine_cc": 6200, "power_hp": 420, "price_usd": 65000},
+    "mitsubishi outlander": {"brand": "Mitsubishi", "model": "Outlander", "engine_cc": 2000, "power_hp": 145, "price_usd": 18000},
+    "аутлендер": {"brand": "Mitsubishi", "model": "Outlander", "engine_cc": 2000, "power_hp": 145, "price_usd": 18000},
+    "mitsubishi pajero": {"brand": "Mitsubishi", "model": "Pajero", "engine_cc": 3000, "power_hp": 178, "price_usd": 28000},
+    "паджеро": {"brand": "Mitsubishi", "model": "Pajero", "engine_cc": 3000, "power_hp": 178, "price_usd": 28000},
 }
 
 user_histories: Dict[int, List[Dict[str, str]]] = {}
 user_profiles: Dict[int, Dict[str, Any]] = {}
 GET_NAME, GET_PHONE, CHAT = range(3)
 
-SYSTEM_PROMPT = """Ты — AI-ассистент компании CARFIRE по пригону автомобилей из-за рубежа.
-Тебя зовут Игорь. Ты настоящий ИИ-консультант, не просто бот.
+SYSTEM_PROMPT = """Ты — Игорь, AI-ассистент компании CARFIRE. Занимаемся пригоном автомобилей из-за рубежа.
 
-Тон: уверенный, спокойный, дружелюбный. Без воды. Живой язык.
+О компании:
+— Основные направления: Китай и США
+— По запросу: Европа, Канада, Япония, Корея
+— Везём любые марки и модели
+— Комиссия CARFIRE: 90 000 ₽ за полное сопровождение (не говори об этом пока не спросят)
+— Сроки из Китая: 3–6 недель, из США: 6–10 недель, Европа: индивидуально
+— Менеджер Евгений: @superluxxx
 
-ВАЖНО: CARFIRE привозит ЛЮБЫЕ автомобили из ЛЮБЫХ стран — Китай, США, Европа, Япония, Корея, Канада.
-Мы можем привезти Audi, BMW, Mercedes, Toyota и абсолютно любую марку из любой страны.
-НИКОГДА не говори что мы не можем привезти машину или что она не производится в какой-то стране.
-НИКОГДА не говори что авто нет в базе — просто рассчитай стоимость.
+Стиль общения:
+— Живой, дружелюбный, уверенный
+— Без воды и канцелярщины
+— Как опытный консультант который реально разбирается в теме
+— Иногда обращайся к клиенту по имени
 
-Правила:
-1. Если клиент назвал марку или модель — сразу предложи расчёт стоимости под ключ
-2. Если клиент спрашивает цену — сразу считай, не болтай
-3. Комиссию не упоминай пока не спросят
-4. К менеджеру только если клиент готов купить или просит оформить
-5. Не здоровайся повторно — продолжай разговор
-6. 3–5 предложений в ответе
-7. Только русский язык
-8. Если спросят кто ты — честно скажи что ИИ-ассистент CARFIRE
+Что делать при разных запросах:
 
-Передача менеджеру: "Передаю тебя менеджеру Евгению: @superluxxx"
+1. Если клиент интересуется конкретной маркой/моделью — скажи что везём, уточни год и страну если не указал, предложи посчитать стоимость
+
+2. Если клиент спрашивает про стоимость или просит посчитать — ВАЖНО: отвечай что расчёт уже готов или предложи его сделать. Напиши "Посчитай [модель] [год]" чтобы получить точный расчёт под ключ.
+
+3. Если клиент спрашивает общие вопросы (сроки, документы, растаможка, как работает) — отвечай развёрнуто и по делу
+
+4. Если клиент готов покупать — передай менеджеру Евгению: @superluxxx
+
+Жёсткие правила:
+— НИКОГДА не говори что мы не можем привезти какую-то машину
+— НИКОГДА не говори что авто нет в базе
+— Не называй точную итоговую сумму — только ориентир. Точный расчёт даёт кнопка или команда "посчитай"
+— Не здоровайся повторно в одном диалоге
+— Не навязывай менеджера без причины — сначала помоги сам
+— Отвечай на русском языке
+— Максимум 5 предложений в ответе
 """
 
 client = Groq(api_key=GROQ_API_KEY)
@@ -331,20 +266,16 @@ async def do_calc(price_usd: float, cc: int, hp: int, year: int, usd_rate: float
     eur_rate = rate * 0.93
     age = 2025 - year
     price_rub = price_usd * rate
-    china = COMPANY_DATA["china_processing_usd"] * rate
-    transfer = (price_rub + china) * COMPANY_DATA["transfer_commission_pct"]
-    logistics = COMPANY_DATA["logistics_usd"] * rate
+    china = 1700 * rate
+    transfer = (price_rub + china) * 0.02
+    logistics = 2500 * rate
     duty = calc_duty(price_usd * 0.93, cc, age) * eur_rate
     util = 20000 * (0.17 if age < 3 else 0.26)
     excise = calc_excise(hp)
-    sbkts = COMPANY_DATA["sbkts_epts_rus_rub"]
-    comm = COMPANY_DATA["commission_rub"]
-    hidden = COMPANY_DATA["hidden_margin_rub"]
-    total = price_rub + china + transfer + logistics + duty + util + excise + sbkts + comm + hidden
+    total = price_rub + china + transfer + logistics + duty + util + excise + 75000 + 90000 + 200000
     return {
         "price_rub": price_rub, "china": china, "transfer": transfer,
         "logistics": logistics, "duty": duty, "util": util, "excise": excise,
-        "sbkts": sbkts, "comm": comm,
         "total_min": total - 50000, "total_max": total + 50000,
         "rate": rate, "age": age,
     }
@@ -352,164 +283,57 @@ async def do_calc(price_usd: float, cc: int, hp: int, year: int, usd_rate: float
 
 def format_calc(label: str, c: Dict) -> str:
     def r(x): return f"{int(round(x)):,}".replace(",", " ")
-    age_str = "новый" if c["age"] < 3 else f"б/у {c['age']} лет"
+    age_str = "до 3 лет" if c["age"] < 3 else f"б/у {c['age']} лет"
     return (
-        f"💰 Расчёт под ключ — {label} ({age_str})\n\n"
-        f"🚗 Цена авто: {r(c['price_rub'])} ₽\n"
-        f"📦 Оформление в стране: {r(c['china'])} ₽\n"
-        f"💳 Комиссия за перевод (2%): {r(c['transfer'])} ₽\n"
-        f"🚢 Доставка до России: {r(c['logistics'])} ₽\n"
-        f"🛃 Таможенная пошлина: {r(c['duty'])} ₽\n"
-        f"♻️ Утилизационный сбор: {r(c['util'])} ₽\n"
-        f"⚡ Акциз: {r(c['excise'])} ₽\n"
-        f"📋 СБКТС + ЭПТС + русификация: {r(c['sbkts'])} ₽\n"
-        f"🤝 Комиссия CARFIRE: {r(c['comm'])} ₽\n\n"
-        f"━━━━━━━━━━━━━━━━━━━━\n"
-        f"📌 Итого под ключ: от {r(c['total_min'])} до {r(c['total_max'])} ₽\n\n"
-        f"Курс USD: {c['rate']:.2f} ₽\n"
-        f"Расчёт ориентировочный. Точную сумму подтвердит менеджер: @superluxxx"
+        f"Расчёт под ключ — {label} ({age_str})\n"
+        f"Курс USD: {c['rate']:.2f} ₽\n\n"
+        f"Цена авто:                {r(c['price_rub'])} ₽\n"
+        f"Оформление в стране:      {r(c['china'])} ₽\n"
+        f"Перевод (2%):             {r(c['transfer'])} ₽\n"
+        f"Доставка до России:       {r(c['logistics'])} ₽\n"
+        f"Таможенная пошлина:       {r(c['duty'])} ₽\n"
+        f"Утилизационный сбор:      {r(c['util'])} ₽\n"
+        f"Акциз:                    {r(c['excise'])} ₽\n"
+        f"СБКТС + ЭПТС + рус-я:    75 000 ₽\n"
+        f"Комиссия CARFIRE:         90 000 ₽\n\n"
+        f"Итого под ключ:\n"
+        f"от {r(c['total_min'])} до {r(c['total_max'])} ₽\n\n"
+        f"Расчёт ориентировочный. Точную сумму уточнит менеджер: @superluxxx"
     )
-
 
 def normalize(text: str) -> str:
     return re.sub(r"\s+", " ", text.strip().lower())
 
+def extract_year(text: str) -> Optional[int]:
+    m = re.search(r"\b(19[5-9]\d|20[0-2]\d)\b", text)
+    return int(m.group(1)) if m else None
+
 def find_car(text: str) -> Optional[Dict]:
     t = normalize(text)
-    # Сначала в базе
-    best_db, best_db_score = None, 0
-    for car in CARS_DATABASE:
-        score = 0
-        if car["brand"].lower() in t: score += 10
-        if car["model"].lower() in t: score += 8
-        yr = extract_year(text)
-        if yr and car["year"] == yr: score += 5
-        if score > best_db_score:
-            best_db_score = score
-            best_db = car
-    if best_db_score >= 8:
-        return {"source": "db", "data": best_db}
-    # Потом в словаре
     best_key, best_len = None, 0
     for key in KNOWN_CARS:
         k = key.strip()
         if k in t and len(k) > best_len:
             best_key = key
             best_len = len(k)
-    if best_key:
-        return {"source": "dict", "data": KNOWN_CARS[best_key]}
-    return None
+    return KNOWN_CARS[best_key] if best_key else None
 
-def asked_commission(text: str) -> bool:
+def needs_calc(text: str) -> bool:
     t = normalize(text)
-    return any(w in t for w in ["комиссия", "сколько берете", "сколько берёте",
-                                  "стоимость услуг", "ваши услуги", "что входит"])
+    return any(w in t for w in [
+        "посчитай", "рассчитай", "посчитать", "рассчитать",
+        "под ключ", "сколько стоит", "сколько будет стоить",
+        "сколько выйдет", "во сколько обойдётся", "во сколько обойдется",
+        "расчёт", "расчет", "цена под ключ", "стоимость под ключ",
+        "сколько стоит привезти",
+    ])
 
 def needs_manager(text: str) -> bool:
     t = normalize(text)
-    return any(p in t for p in COMPANY_DATA["lead_handoff_triggers"])
-
-def wants_calc(text: str) -> bool:
-    t = normalize(text)
-    # Явные слова расчёта
-    calc_words = [
-        "посчитай", "рассчитай", "посчитать", "рассчитать",
-        "под ключ", "цена под ключ", "стоимость под ключ",
-        "сколько стоит", "сколько будет", "сколько выйдет",
-        "во сколько обойдётся", "во сколько обойдется",
-        "сколько стоит привезти", "сколько будет стоить",
-        "почём", "почем", "цена", "стоимость", "расчёт", "расчет",
-    ]
-    if any(w in t for w in calc_words):
-        return True
-    # Если назвал конкретное авто — тоже считаем
-    return find_car(t) is not None
-
-def extract_year(text: str) -> Optional[int]:
-    m = re.search(r"\b(19[5-9]\d|20[0-2]\d)\b", text)
-    return int(m.group(1)) if m else None
-
-def extract_budget(text: str) -> Optional[int]:
-    t = normalize(text).replace("₽", "").replace("рублей", "").replace("руб", "")
-    m = re.search(r"(\d+(?:[.,]\d+)?)\s*млн", t)
-    if m: return int(float(m.group(1).replace(",", ".")) * 1_000_000)
-    m = re.search(r"\b(\d{6,8})\b", t)
-    if m: return int(m.group(1))
-    return None
-
-def detect_countries(text: str) -> List[str]:
-    t = normalize(text)
-    return [c for c in COMPANY_DATA["main_directions"] + COMPANY_DATA["extra_directions"]
-            if c.lower() in t]
-
-def detect_under_160(text: str) -> bool:
-    t = normalize(text)
-    return any(w in t for w in ["до 160", "проходной", "проходная", "проходные",
-                                  "до налоговой", "160 сил", "160 лс"])
-
-def search_for_context(query: str, budget: Optional[int], countries: List[str],
-                        under_160: bool, usd_rate: float) -> List[Dict]:
-    q = normalize(query)
-    results = []
-    for car in CARS_DATABASE:
-        if not car.get("is_available"): continue
-        if countries and car["country"] not in countries: continue
-        if under_160 and not car.get("is_under_160_hp"): continue
-        if budget and car["price_usd"] * (usd_rate + 2) * 1.5 > budget: continue
-        score = 0
-        blob = f"{car['brand']} {car['model']} {car['country']} {car['comment']}".lower()
-        for word in q.split():
-            if len(word) >= 3 and word in blob: score += 2
-        if car.get("priority"): score += 2
-        if under_160 and car.get("is_under_160_hp"): score += 3
-        results.append((score, car))
-    results.sort(key=lambda x: (x[0], -x[1].get("year", 0)), reverse=True)
-    return [c for _, c in results[:3]]
-
-def build_context(user_id: int, text: str, usd_rate: float) -> str:
-    profile = user_profiles.get(user_id, {})
-    name = profile.get("name", "")
-    budget = extract_budget(text)
-    countries = detect_countries(text)
-    under_160 = detect_under_160(text)
-    show_comm = asked_commission(text)
-    cars = search_for_context(text, budget, countries, under_160, usd_rate)
-
-    lines = [
-        f"Компания: {COMPANY_DATA['name']} — привозим ЛЮБЫЕ авто из ЛЮБЫХ стран",
-        f"Основные: {', '.join(COMPANY_DATA['main_directions'])}",
-        f"По запросу: {', '.join(COMPANY_DATA['extra_directions'])}",
-        f"Курс USD: {usd_rate + 2:.2f} ₽",
-    ]
-    if name: lines.append(f"Клиент: {name}")
-    if budget: lines.append(f"Бюджет: до {budget:,} ₽".replace(",", " "))
-    if countries: lines.append(f"Страны: {', '.join(countries)}")
-    if under_160: lines.append("Фильтр: до 160 л.с.")
-
-    lines.append("\nСроки:")
-    for c, t in COMPANY_DATA["delivery_terms"].items():
-        lines.append(f"  {c}: {t}")
-
-    if show_comm:
-        lines.append(f"\nКомиссия: {COMPANY_DATA['commission_text']}")
-    else:
-        lines.append("\nКомиссию не упоминать.")
-
-    lines.append("\nАвто из базы:")
-    if cars:
-        for car in cars:
-            lines.append(
-                f"  • {car['brand']} {car['model']} {car['year']} | "
-                f"{car['power_hp']}лс | ~{int(car['price_usd']*(usd_rate+2)):,}₽ | "
-                f"{'✅до160' if car['is_under_160_hp'] else '⚠️выше160'} | "
-                f"{car['comment']}"
-            )
-    else:
-        lines.append("  Авто из базы не подобрано — используй словарь KNOWN_CARS.")
-
-    lines.append(f"\nМенеджер: {COMPANY_DATA['manager_telegram']}")
-    return "\n".join(lines)
-
+    return any(p in t for p in [
+        "хочу купить", "готов купить", "нужен точный расчет",
+        "давай оформлять", "оформить заявку", "готов к покупке",
+    ])
 
 async def notify_managers(bot: Bot, name: str, phone: str, tg_id: int, username: str):
     text = (f"🔥 Новый лид!\n\n👤 {name}\n📱 {phone}\n"
@@ -569,7 +393,7 @@ async def get_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
             phone = update.message.text.strip()
     if not phone:
         await update.message.reply_text(
-            f"{name}, без номера не получится передать тебя менеджеру 🙂\n\nНажми кнопку ниже 👇",
+            f"{name}, без номера не получится передать тебя менеджеру когда придёт время 🙂\n\nНажми кнопку ниже 👇",
             reply_markup=phone_keyboard()
         )
         return GET_PHONE
@@ -577,9 +401,8 @@ async def get_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
     logging.info(f"Лид | {name} | {phone} | @{username} | {user_id}")
     await notify_managers(context.bot, name, phone, user_id, username)
     await update.message.reply_text(
-        f"Отлично, {name}!\n\nПиши что ищешь — марку, модель, бюджет, страну.\n"
-        f"Например: «Audi A3 из Европы» или «кроссовер до 3 млн до 160 сил».\n\n"
-        f"Могу сразу посчитать стоимость под ключ 👇",
+        f"Отлично, {name}!\n\nСпрашивай что интересует — из каких стран везём, "
+        f"сроки, стоимость, растаможка. Или назови марку и модель — посчитаю под ключ 👇",
         reply_markup=main_keyboard()
     )
     return CHAT
@@ -596,9 +419,9 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return CHAT
 
     quick_map = {
-        "🚗 Подобрать авто": "Помоги подобрать автомобиль для пригона. Покажи варианты и ориентир по цене.",
-        "💰 Рассчитать стоимость": "Рассчитай стоимость под ключ для подходящего авто.",
-        "⚡ До 160 л.с.": "Покажи варианты авто до 160 л.с. и рассчитай стоимость под ключ.",
+        "🚗 Подобрать авто": "Хочу подобрать автомобиль для пригона. Что можете предложить?",
+        "💰 Рассчитать стоимость": "Хочу рассчитать стоимость автомобиля под ключ.",
+        "⚡ До 160 л.с.": "Интересуют авто до 160 л.с. — проходные по налогу. Что есть?",
         "🌍 Из каких стран везёте?": "Из каких стран вы привозите автомобили?",
         "⏱ Сроки доставки": "Какие сроки доставки по разным направлениям?",
     }
@@ -613,31 +436,55 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     usd_rate = await get_usd_rate()
 
-    if wants_calc(llm_input):
+    # Запрос расчёта — ищем авто и считаем
+    if needs_calc(llm_input):
         year_override = extract_year(llm_input)
-        found = find_car(llm_input)
-        if found:
-            d = found["data"]
-            year = year_override or (d.get("year") or 2023)
-            label = f"{d['brand']} {d['model']} {year}"
-            calc = await do_calc(d["price_usd"], d["engine_cc"], d["power_hp"], year, usd_rate)
+        car = find_car(llm_input)
+        if car:
+            year = year_override or 2023
+            label = f"{car['brand']} {car['model']} {year}"
+            calc = await do_calc(car["price_usd"], car["engine_cc"], car["power_hp"], year, usd_rate)
             await update.message.reply_text(format_calc(label, calc), reply_markup=main_keyboard())
             return CHAT
-        # Если авто не найдено — уходим в LLM чтобы он спросил уточнение
+
+    # Всё остальное — LLM
+    profile = user_profiles.get(user_id, {})
+    name = profile.get("name", "")
+
+    # Собираем контекст для LLM
+    car_in_msg = find_car(llm_input)
+    year_in_msg = extract_year(llm_input)
+    car_context = ""
+    if car_in_msg:
+        year = year_in_msg or 2023
+        age = 2025 - year
+        approx_calc = await do_calc(car_in_msg["price_usd"], car_in_msg["engine_cc"],
+                                     car_in_msg["power_hp"], year, usd_rate)
+        car_context = (
+            f"\nАвто в запросе: {car_in_msg['brand']} {car_in_msg['model']} {year} | "
+            f"{car_in_msg['power_hp']} л.с. | {car_in_msg['engine_cc']} куб.см\n"
+            f"Ориентировочная стоимость под ключ: "
+            f"от {int(approx_calc['total_min']):,} до {int(approx_calc['total_max']):,} ₽\n"
+            f"(скажи клиенту этот диапазон если спрашивает о цене)\n"
+        ).replace(",", " ")
+
+    system_with_context = SYSTEM_PROMPT
+    if name:
+        system_with_context += f"\nИмя клиента: {name}"
+    if car_context:
+        system_with_context += car_context
 
     user_histories.setdefault(user_id, [])
     user_histories[user_id].append({"role": "user", "content": llm_input})
     user_histories[user_id] = user_histories[user_id][-14:]
-    ctx = build_context(user_id, llm_input, usd_rate)
 
     try:
         response = client.chat.completions.create(
             model="llama-3.3-70b-versatile",
             messages=[
-                {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "system", "content": "Контекст:\n" + ctx},
+                {"role": "system", "content": system_with_context},
             ] + user_histories[user_id],
-            temperature=0.3,
+            temperature=0.4,
             max_tokens=500,
         )
         reply = response.choices[0].message.content.strip()
