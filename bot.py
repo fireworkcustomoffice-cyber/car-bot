@@ -11,30 +11,50 @@ logging.basicConfig(format="%(asctime)s | %(levelname)s | %(message)s", level=lo
 
 TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
-
-# ID менеджеров — Евгений должен написать /start боту чтобы получать уведомления
 MANAGER_IDS = [7328478138, 295158168]
 
 SYSTEM_PROMPT = """Ты — Игорь, AI-ассистент компании CARFIRE. Помогаем пригнать автомобиль из-за рубежа.
 
-О компании:
-— Основные направления: Китай (новые авто, высокая комплектация) и США (аукционы битых авто, восстанавливаем до идеального состояния)
-— По запросу: Европа, Канада, Япония, Корея
-— Сроки из Китая: 3–6 недель
-— Сроки из США: 6–10 недель
-— Европа и другие: индивидуально
-— Менеджер Евгений: @superluxxx
+О компании CARFIRE:
+— Привозим автомобили из Китая, США и других стран (Европа, Япония, Корея, Канада — по запросу)
+— Работаем с любыми марками, чаще всего немецкие и японские
+— Популярны авто до 160 л.с. — они выгоднее по налогу
 
-Стиль: живой, дружелюбный, уверенный. Без воды. Как опытный консультант.
+Китай:
+— Площадка: che168.com
+— Новые и б/у автомобили
+— Обычно высокая комплектация по сравнению с РФ
+— Сроки: 3–6 недель
+
+США:
+— Работаем с аукционами (Copart, IAAI) и обычными авто
+— Берём авто с небольшими повреждениями — восстановление включено в стоимость
+— Клиент получает отличный автомобиль по выгодной цене
+— Популярны немецкие и японские марки
+— Сроки: 6–10 недель
+
+Как работаем:
+— Клиент оставляет заявку
+— Обсуждаем задачу — что именно нужно, бюджет, пожелания
+— Предлагаем варианты и находим то что лучше всего подходит
+— Сопровождаем сделку от покупки до получения авто
+— Возможна работа как с предоплатой так и без
+
+Стоимость:
+— Не называй конкретных цифр — это делает менеджер индивидуально
+— Можно сказать что стоимость зависит от марки, модели, года, мощности и курса
+
+Менеджер Евгений: @superluxxx
+
+Стиль: живой, дружелюбный, уверенный. Без воды. Как опытный консультант. Иногда обращайся по имени.
 
 Правила:
-1. Отвечай на вопросы про пригон — сроки, страны, документы, растаможка, как работаем
-2. Никогда не называй точные цены и не считай стоимость — говори что менеджер сделает точный расчёт
-3. Не говори что мы не можем что-то привезти
-4. Не здоровайся повторно в одном диалоге
+1. Отвечай на вопросы про пригон — сроки, страны, процесс, документы, растаможка
+2. Никогда не называй конкретные цены — только менеджер
+3. Не говори что мы что-то не можем
+4. Не здоровайся повторно
 5. Максимум 4–5 предложений
 6. Только русский язык
-7. Когда клиент готов к покупке или хочет расчёт — говори что менеджер Евгений (@superluxxx) свяжется с ним
 """
 
 client = Groq(api_key=GROQ_API_KEY)
@@ -49,7 +69,7 @@ async def notify_managers(bot: Bot, profile: dict):
         f"👤 {profile.get('name', '—')}\n"
         f"📱 {profile.get('phone', '—')}\n"
         f"🚗 Интерес: {profile.get('car', '—')}\n"
-        f"💬 @{profile.get('username', 'нет')}\n"
+        f"💬 @{profile.get('username') or 'нет'}\n"
         f"🆔 {profile.get('tg_id', '—')}"
     )
     for mid in MANAGER_IDS:
@@ -63,6 +83,7 @@ def main_keyboard():
     return ReplyKeyboardMarkup([
         [KeyboardButton("🚗 Оставить заявку"), KeyboardButton("🌍 Откуда привозите?")],
         [KeyboardButton("⏱ Сроки доставки"), KeyboardButton("❓ Как это работает?")],
+        [KeyboardButton("⚡ Авто до 160 л.с."), KeyboardButton("🇨🇳 Китай vs 🇺🇸 США")],
         [KeyboardButton("📞 Связаться с менеджером")],
     ], resize_keyboard=True)
 
@@ -71,6 +92,60 @@ def phone_keyboard():
         [[KeyboardButton("📱 Отправить номер", request_contact=True)]],
         resize_keyboard=True
     )
+
+
+# Готовые ответы на кнопки — без LLM, быстро и точно
+QUICK_ANSWERS = {
+    "🌍 Откуда привозите?": (
+        "Основные направления:\n\n"
+        "🇨🇳 Китай — новые и б/у авто, высокая комплектация, площадка che168.com\n"
+        "🇺🇸 США — аукционы Copart и IAAI, а также обычный рынок\n\n"
+        "По запросу: Европа, Япония, Корея, Канада.\n\n"
+        "Привозим любые марки — чаще всего немецкие и японские."
+    ),
+    "⏱ Сроки доставки": (
+        "Сроки доставки:\n\n"
+        "🇨🇳 Китай — 3–6 недель\n"
+        "🇺🇸 США — 6–10 недель\n"
+        "🌍 Европа, Япония, Корея — индивидуально\n\n"
+        "Точные сроки зависят от конкретного авто и маршрута. "
+        "Менеджер скажет точнее под твой запрос."
+    ),
+    "❓ Как это работает?": (
+        "Процесс пригона:\n\n"
+        "1️⃣ Оставляешь заявку — рассказываешь что нужно\n"
+        "2️⃣ Обсуждаем задачу — бюджет, пожелания, приоритеты\n"
+        "3️⃣ Подбираем варианты — предлагаем то что реально подходит\n"
+        "4️⃣ Согласовываем — ты выбираешь, мы закупаем\n"
+        "5️⃣ Доставка и оформление — берём на себя всё\n"
+        "6️⃣ Получаешь авто — готовое к езде\n\n"
+        "Работаем как с предоплатой так и без — обсуждается индивидуально."
+    ),
+    "⚡ Авто до 160 л.с.": (
+        "Авто до 160 л.с. — популярный выбор 🔥\n\n"
+        "Почему выгодно:\n"
+        "— Ниже транспортный налог\n"
+        "— Меньше таможенные платежи\n"
+        "— Отличный выбор из Китая по хорошей цене\n\n"
+        "Привозим любые марки до 160 л.с. — кроссоверы, седаны, хэтчбеки. "
+        "Оставь заявку — подберём варианты под твой бюджет."
+    ),
+    "🇨🇳 Китай vs 🇺🇸 США": (
+        "Китай vs США — в чём разница?\n\n"
+        "🇨🇳 Китай:\n"
+        "— Новые и б/у авто\n"
+        "— Высокая комплектация\n"
+        "— Быстрее (3–6 недель)\n"
+        "— Популярен для авто до 160 л.с.\n\n"
+        "🇺🇸 США:\n"
+        "— Аукционы и обычный рынок\n"
+        "— Авто с повреждениями восстанавливаем — клиент получает отличную машину по выгодной цене\n"
+        "— Хорошо для немецких и японских марок\n"
+        "— Дольше (6–10 недель)\n\n"
+        "Что лучше именно для тебя — зависит от бюджета и модели. "
+        "Менеджер подскажет!"
+    ),
+}
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -92,7 +167,7 @@ async def get_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["tg_id"] = update.effective_user.id
     await update.message.reply_text(
         f"{name}, приятно! 🤝\n\n"
-        f"Оставь номер — менеджер сможет с тобой связаться.",
+        f"Оставь номер телефона — менеджер сможет связаться с тобой.",
         reply_markup=phone_keyboard()
     )
     return GET_PHONE
@@ -109,20 +184,17 @@ async def get_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
             phone = update.message.text.strip()
         else:
             await update.message.reply_text(
-                f"{name}, нажми кнопку ниже или напиши номер 👇",
+                f"{name}, нажми кнопку или напиши номер 👇",
                 reply_markup=phone_keyboard()
             )
             return GET_PHONE
     else:
-        await update.message.reply_text(
-            f"Нажми кнопку ниже 👇",
-            reply_markup=phone_keyboard()
-        )
+        await update.message.reply_text("Нажми кнопку ниже 👇", reply_markup=phone_keyboard())
         return GET_PHONE
 
     context.user_data["phone"] = phone
     await update.message.reply_text(
-        f"Отлично! Теперь скажи — какой автомобиль интересует?\n\n"
+        f"Отлично! Теперь скажи — какой автомобиль тебя интересует?\n\n"
         f"Напиши марку, модель, примерный бюджет или просто что ищешь.",
         reply_markup=ReplyKeyboardMarkup([[]], resize_keyboard=True)
     )
@@ -133,15 +205,14 @@ async def get_car(update: Update, context: ContextTypes.DEFAULT_TYPE):
     car = update.message.text.strip()
     context.user_data["car"] = car
 
-    # Отправляем лид менеджерам
     await notify_managers(context.bot, context.user_data)
     logging.info(f"Лид: {context.user_data}")
 
     name = context.user_data.get("name", "")
     await update.message.reply_text(
-        f"Принял! 👍\n\n"
-        f"Менеджер Евгений свяжется с тобой в ближайшее время и сделает точный расчёт.\n\n"
-        f"Пока можешь задать любой вопрос — я отвечу 👇",
+        f"Принял, {name}! 👍\n\n"
+        f"Менеджер Евгений свяжется с тобой в ближайшее время и подберёт варианты.\n\n"
+        f"Пока можешь узнать больше о нас 👇",
         reply_markup=main_keyboard()
     )
     return CHAT
@@ -151,36 +222,38 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     user_text = (update.message.text or "").strip()
 
+    # Кнопка менеджера
     if user_text == "📞 Связаться с менеджером":
         await update.message.reply_text(
-            "Менеджер Евгений:\nTelegram: @superluxxx\n\nНапиши ему напрямую — он поможет с расчётом и подбором.",
+            "Менеджер Евгений:\nTelegram: @superluxxx\n\n"
+            "Напиши ему напрямую — он поможет с подбором и расчётом.",
             reply_markup=main_keyboard()
         )
         return CHAT
 
+    # Кнопка заявки
     if user_text == "🚗 Оставить заявку":
         await update.message.reply_text(
             "Напиши какой автомобиль тебя интересует — марку, модель, бюджет или страну.\n"
-            "Менеджер свяжется и сделает расчёт под твой запрос.",
+            "Менеджер свяжется и сделает подбор под твой запрос.",
             reply_markup=main_keyboard()
         )
         return CHAT
 
-    quick_map = {
-        "🌍 Откуда привозите?": "Из каких стран вы привозите автомобили?",
-        "⏱ Сроки доставки": "Какие сроки доставки?",
-        "❓ Как это работает?": "Как работает пригон авто? Расскажи процесс.",
-    }
-    llm_input = quick_map.get(user_text, user_text)
+    # Быстрые ответы на кнопки — без LLM
+    if user_text in QUICK_ANSWERS:
+        await update.message.reply_text(QUICK_ANSWERS[user_text], reply_markup=main_keyboard())
+        return CHAT
 
-    user_histories.setdefault(user_id, [])
-    user_histories[user_id].append({"role": "user", "content": llm_input})
-    user_histories[user_id] = user_histories[user_id][-10:]
-
+    # Всё остальное — LLM
     name = context.user_data.get("name", "")
     system = SYSTEM_PROMPT
     if name:
         system += f"\n\nИмя клиента: {name}"
+
+    user_histories.setdefault(user_id, [])
+    user_histories[user_id].append({"role": "user", "content": user_text})
+    user_histories[user_id] = user_histories[user_id][-10:]
 
     try:
         response = client.chat.completions.create(
@@ -197,7 +270,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except Exception as e:
         logging.exception(f"Ошибка: {e}")
         await update.message.reply_text(
-            "Что-то пошло не так. Напиши менеджеру напрямую: @superluxxx",
+            "Что-то пошло не так. Напиши менеджеру: @superluxxx",
             reply_markup=main_keyboard()
         )
 
