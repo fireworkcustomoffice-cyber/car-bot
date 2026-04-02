@@ -1,16 +1,22 @@
 import os
 import logging
+from datetime import datetime
 from telegram import Update, ReplyKeyboardMarkup, KeyboardButton, Bot
 from telegram.ext import (
     Application, MessageHandler, CommandHandler,
     filters, ContextTypes, ConversationHandler,
 )
 from groq import Groq
+import gspread
+from google.oauth2.service_account import Credentials
+import json
 
 logging.basicConfig(format="%(asctime)s | %(levelname)s | %(message)s", level=logging.INFO)
 
 TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
+GOOGLE_CREDENTIALS_JSON = os.environ.get("GOOGLE_CREDENTIALS_JSON")
+SPREADSHEET_ID = os.environ.get("SPREADSHEET_ID")
 MANAGER_IDS = [7328478138, 295158168]
 
 SYSTEM_PROMPT = """Ты — Игорь, AI-ассистент компании CARFIRE. Помогаем пригнать автомобиль из-за рубежа.
@@ -63,6 +69,43 @@ user_histories = {}
 GET_NAME, GET_PHONE, GET_CAR, CHAT = range(4)
 
 
+# --- Google Sheets ---
+
+def get_sheets_client():
+    try:
+        creds_dict = json.loads(GOOGLE_CREDENTIALS_JSON)
+        scopes = [
+            "https://www.googleapis.com/auth/spreadsheets",
+            "https://www.googleapis.com/auth/drive",
+        ]
+        creds = Credentials.from_service_account_info(creds_dict, scopes=scopes)
+        return gspread.authorize(creds)
+    except Exception as e:
+        logging.error(f"Ошибка подключения к Google Sheets: {e}")
+        return None
+
+
+def save_lead_to_sheets(profile: dict):
+    try:
+        gc = get_sheets_client()
+        if not gc:
+            return
+        sheet = gc.open_by_key(SPREADSHEET_ID).sheet1
+        row = [
+            datetime.now().strftime("%d.%m.%Y %H:%M"),
+            profile.get("name", "—"),
+            profile.get("phone", "—"),
+            profile.get("car", "—"),
+            "Новый",
+        ]
+        sheet.append_row(row)
+        logging.info(f"Лид записан в Google Sheets: {row}")
+    except Exception as e:
+        logging.error(f"Ошибка записи в Google Sheets: {e}")
+
+
+# --- Telegram ---
+
 async def notify_managers(bot: Bot, profile: dict):
     text = (
         f"🔥 Новый лид!\n\n"
@@ -94,7 +137,6 @@ def phone_keyboard():
     )
 
 
-# Готовые ответы на кнопки — без LLM, быстро и точно
 QUICK_ANSWERS = {
     "🌍 Откуда привозите?": (
         "Основные направления:\n\n"
@@ -206,6 +248,7 @@ async def get_car(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["car"] = car
 
     await notify_managers(context.bot, context.user_data)
+    save_lead_to_sheets(context.user_data)
     logging.info(f"Лид: {context.user_data}")
 
     name = context.user_data.get("name", "")
@@ -222,7 +265,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     user_text = (update.message.text or "").strip()
 
-    # Кнопка менеджера
     if user_text == "📞 Связаться с менеджером":
         await update.message.reply_text(
             "Менеджер Евгений:\nTelegram: @superluxxx\n\n"
@@ -231,7 +273,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         return CHAT
 
-    # Кнопка заявки
     if user_text == "🚗 Оставить заявку":
         await update.message.reply_text(
             "Напиши какой автомобиль тебя интересует — марку, модель, бюджет или страну.\n"
@@ -240,12 +281,10 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         return CHAT
 
-    # Быстрые ответы на кнопки — без LLM
     if user_text in QUICK_ANSWERS:
         await update.message.reply_text(QUICK_ANSWERS[user_text], reply_markup=main_keyboard())
         return CHAT
 
-    # Всё остальное — LLM
     name = context.user_data.get("name", "")
     system = SYSTEM_PROMPT
     if name:
@@ -280,6 +319,8 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 def main():
     if not TELEGRAM_TOKEN: raise ValueError("Нет TELEGRAM_TOKEN")
     if not GROQ_API_KEY: raise ValueError("Нет GROQ_API_KEY")
+    if not GOOGLE_CREDENTIALS_JSON: raise ValueError("Нет GOOGLE_CREDENTIALS_JSON")
+    if not SPREADSHEET_ID: raise ValueError("Нет SPREADSHEET_ID")
 
     app = Application.builder().token(TELEGRAM_TOKEN).build()
     conv = ConversationHandler(
