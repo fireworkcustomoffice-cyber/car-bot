@@ -248,16 +248,32 @@ async def get_car(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["car"] = car
 
     await notify_managers(context.bot, context.user_data)
-    save_lead_to_sheets(context.user_data)
-    logging.info(f"Лид: {context.user_data}")
-
-    name = context.user_data.get("name", "")
-    await update.message.reply_text(
-        f"Принял, {name}! 👍\n\n"
-        f"Менеджер Евгений свяжется с тобой в ближайшее время и подберёт варианты.\n\n"
-        f"Пока можешь узнать больше о нас 👇",
-        reply_markup=main_keyboard()
-    )
+    def save_lead_to_sheets(profile: dict):
+    try:
+        logging.info(f"Sheets: GOOGLE_CREDENTIALS_JSON присутствует: {bool(GOOGLE_CREDENTIALS_JSON)}")
+        logging.info(f"Sheets: SPREADSHEET_ID: {SPREADSHEET_ID}")
+        if not GOOGLE_CREDENTIALS_JSON or not SPREADSHEET_ID:
+            logging.warning("Sheets отключён — нет переменных")
+            return
+        creds_dict = json.loads(GOOGLE_CREDENTIALS_JSON)
+        scopes = [
+            "https://www.googleapis.com/auth/spreadsheets",
+            "https://www.googleapis.com/auth/drive",
+        ]
+        creds = Credentials.from_service_account_info(creds_dict, scopes=scopes)
+        gc = gspread.authorize(creds)
+        sheet = gc.open_by_key(SPREADSHEET_ID).sheet1
+        row = [
+            datetime.now().strftime("%d.%m.%Y %H:%M"),
+            profile.get("name", "—"),
+            profile.get("phone", "—"),
+            profile.get("car", "—"),
+            "Новый",
+        ]
+        sheet.append_row(row)
+        logging.info(f"✅ Лид записан в Sheets: {row}")
+    except Exception as e:
+        logging.error(f"❌ Ошибка Sheets: {e}")
     return CHAT
 
 
