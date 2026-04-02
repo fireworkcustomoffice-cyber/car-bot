@@ -319,7 +319,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 def main():
     if not TELEGRAM_TOKEN: raise ValueError("Нет TELEGRAM_TOKEN")
     if not GROQ_API_KEY: raise ValueError("Нет GROQ_API_KEY")
-    if not GOOGLE_CREDENTIALS_JSON: raise ValueError("Нет GOOGLE_CREDENTIALS_JSON")
+    if not GOOGLE_CREDENTIALS_JSON: logging.warning("Нет GOOGLE_CREDENTIALS_JSON — Sheets отключён")
     if not SPREADSHEET_ID: logging.warning("Нет SPREADSHEET_ID — Sheets отключён")
 
     app = Application.builder().token(TELEGRAM_TOKEN).build()
