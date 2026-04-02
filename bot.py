@@ -6,7 +6,7 @@ from telegram.ext import (
     Application, MessageHandler, CommandHandler,
     filters, ContextTypes, ConversationHandler,
 )
-from groq import Groq 
+from groq import Groq
 import gspread
 from google.oauth2.service_account import Credentials
 import json
@@ -15,8 +15,6 @@ logging.basicConfig(format="%(asctime)s | %(levelname)s | %(message)s", level=lo
 
 TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
-GOOGLE_CREDENTIALS_JSON = os.environ.get("GOOGLE_CREDENTIALS_JSON")
-SPREADSHEET_ID = os.environ.get("SPREADSHEET_ID")
 MANAGER_IDS = [7328478138, 295158168]
 
 SYSTEM_PROMPT = """Ты — Игорь, AI-ассистент компании CARFIRE. Помогаем пригнать автомобиль из-за рубежа.
@@ -69,28 +67,22 @@ user_histories = {}
 GET_NAME, GET_PHONE, GET_CAR, CHAT = range(4)
 
 
-# --- Google Sheets ---
-
-def get_sheets_client():
+def save_lead_to_sheets(profile: dict):
     try:
-        creds_dict = json.loads(GOOGLE_CREDENTIALS_JSON)
+        creds_json = os.environ.get("GOOGLE_CREDENTIALS_JSON")
+        sheet_id = os.environ.get("SPREADSHEET_ID")
+        logging.info(f"Sheets debug: creds present={bool(creds_json)}, sheet_id={sheet_id}")
+        if not creds_json or not sheet_id:
+            logging.warning("Sheets отключён — нет переменных")
+            return
+        creds_dict = json.loads(creds_json)
         scopes = [
             "https://www.googleapis.com/auth/spreadsheets",
             "https://www.googleapis.com/auth/drive",
         ]
         creds = Credentials.from_service_account_info(creds_dict, scopes=scopes)
-        return gspread.authorize(creds)
-    except Exception as e:
-        logging.error(f"Ошибка подключения к Google Sheets: {e}")
-        return None
-
-
-def save_lead_to_sheets(profile: dict):
-    try:
-        gc = get_sheets_client()
-        if not gc:
-            return
-        sheet = gc.open_by_key(SPREADSHEET_ID).sheet1
+        gc = gspread.authorize(creds)
+        sheet = gc.open_by_key(sheet_id).sheet1
         row = [
             datetime.now().strftime("%d.%m.%Y %H:%M"),
             profile.get("name", "—"),
@@ -99,12 +91,10 @@ def save_lead_to_sheets(profile: dict):
             "Новый",
         ]
         sheet.append_row(row)
-        logging.info(f"Лид записан в Google Sheets: {row}")
+        logging.info(f"✅ Лид записан в Sheets: {row}")
     except Exception as e:
-        logging.error(f"Ошибка записи в Google Sheets: {e}")
+        logging.error(f"❌ Ошибка Sheets: {e}")
 
-
-# --- Telegram ---
 
 async def notify_managers(bot: Bot, profile: dict):
     text = (
@@ -248,32 +238,16 @@ async def get_car(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["car"] = car
 
     await notify_managers(context.bot, context.user_data)
-    def save_lead_to_sheets(profile: dict):
-    try:
-        logging.info(f"Sheets: GOOGLE_CREDENTIALS_JSON присутствует: {bool(GOOGLE_CREDENTIALS_JSON)}")
-        logging.info(f"Sheets: SPREADSHEET_ID: {SPREADSHEET_ID}")
-        if not GOOGLE_CREDENTIALS_JSON or not SPREADSHEET_ID:
-            logging.warning("Sheets отключён — нет переменных")
-            return
-        creds_dict = json.loads(GOOGLE_CREDENTIALS_JSON)
-        scopes = [
-            "https://www.googleapis.com/auth/spreadsheets",
-            "https://www.googleapis.com/auth/drive",
-        ]
-        creds = Credentials.from_service_account_info(creds_dict, scopes=scopes)
-        gc = gspread.authorize(creds)
-        sheet = gc.open_by_key(SPREADSHEET_ID).sheet1
-        row = [
-            datetime.now().strftime("%d.%m.%Y %H:%M"),
-            profile.get("name", "—"),
-            profile.get("phone", "—"),
-            profile.get("car", "—"),
-            "Новый",
-        ]
-        sheet.append_row(row)
-        logging.info(f"✅ Лид записан в Sheets: {row}")
-    except Exception as e:
-        logging.error(f"❌ Ошибка Sheets: {e}")
+    save_lead_to_sheets(context.user_data)
+    logging.info(f"Лид: {context.user_data}")
+
+    name = context.user_data.get("name", "")
+    await update.message.reply_text(
+        f"Принял, {name}! 👍\n\n"
+        f"Менеджер Евгений свяжется с тобой в ближайшее время и подберёт варианты.\n\n"
+        f"Пока можешь узнать больше о нас 👇",
+        reply_markup=main_keyboard()
+    )
     return CHAT
 
 
@@ -333,10 +307,10 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 def main():
-    if not TELEGRAM_TOKEN: raise ValueError("Нет TELEGRAM_TOKEN")
-    if not GROQ_API_KEY: raise ValueError("Нет GROQ_API_KEY")
-    if not GOOGLE_CREDENTIALS_JSON: logging.warning("Нет GOOGLE_CREDENTIALS_JSON — Sheets отключён")
-    if not SPREADSHEET_ID: logging.warning("Нет SPREADSHEET_ID — Sheets отключён")
+    if not TELEGRAM_TOKEN:
+        raise ValueError("Нет TELEGRAM_TOKEN")
+    if not GROQ_API_KEY:
+        raise ValueError("Нет GROQ_API_KEY")
 
     app = Application.builder().token(TELEGRAM_TOKEN).build()
     conv = ConversationHandler(
