@@ -66,23 +66,32 @@ user_histories = {}
 
 GET_NAME, GET_PHONE, GET_CAR, CHAT = range(4)
 
+SPREADSHEET_ID = "1ChQu78k-1b8wBWew1izazOpHDaq5N8HuFADLbHtMW_g"
+
+GOOGLE_CREDS = {
+    "type": "service_account",
+    "project_id": "carfire-auto",
+    "private_key_id": "b269e6de469fd6c2de7a1aca18a7e86d7996980a",
+    "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQDPtdjVrdQ+Otec\nTpDRYwZmxAE0xppa+IbyWZW8oaalZvyVaAkQpu8Mk++5GfQXETodHcu6vCPDFndD\nuU4cIvaVqaMgAiM9X+1lWgnpCJE7fyowoceODIw7irCTn0GG36leA8JwWOpIoLJc\nk1Xoq3MFZCkalQMMSxAEfhi+Hnp3Fz12R6jHY4XF0aHgSbN9sU3br56Ysk97MSX6\nRIMzffappefRGMKUFBLotx+yVGWhLeS2+jokwSnRWsx7iMDc3nMfgm+QQayeoaCj\n9Khxk8nrEHjZmwGRWYuXWupcQhyai8cgWOLsmX5yViUmUxxfPmbg1i7M8fWdtC0T\ngPZ0jRzxAgMBAAECggEABHvduDEmM4i0Jlbo1+hOF1JUX1YJN30Fdr5Z1eZccVYh\njj0ecvpTjz8zTdjiVMwlp8LApuGQWRIHVZIuvjs//PeaQqLhLV5Agu9YZuwtLG5g\nlAeuBeI99bwW9zzZHob+Aj5NCH1W42X6q7ZvhJQM6dkhbQY5+F43dI1fTd1dEeyH\nyB0pCkeronjlBCjtadz2RXraTFxNH2Od4CLdXsa4MW2XXxtW7bW7rUYlqmcOB/wg\n1Z5JVQraFXFVBg8Bq/O6GEO4ZReAR1QQRFzrdPRQOETgTH6/ZAYHwKr/mJpfa5Vs\nz7FsxWsFlTa+SZkW62MyizQZPhXrDKX+27p7gTEuAQKBgQD2WQjvsjIXWYyf0vD3\nLkuyI/tYOAo3tG9TVBL/oj4R9RFinGyLsubsOLmlSwjua5O621gvrD1xP3xTlCCs\nJQLeQj5sG0d1bE2qJeV2nNV8PuFHC38Mt6fzVoZRbDmNj8mfB6f7Vjab6Q4zQ3WZ\nWwLoG6XYmalXS8fWLJhOHXF5gQKBgQDX2UNmWphFo1GKeqaqtJIknggvigf0XbeY\nsv9YHRu1c1dZmyShc1rzv6EF8+YZmv8H7iiWMhdmLxXN1baSZVzRKu1PLG9cAXRh\nib36+wLDARP+kvmkRzp6rVr++bhNi7a7Ac2jFK6c0906nKIoI2FH9csmWcwN//HE\nSpiim9X7cQKBgAnpiTeD1woje0oPBc0cWsVfN0TUdGzLYNNchastjwvP7ZQnMSLp\n3urQWX/yJfjZ8UbKfqDkcFB3OnxucGYc0yG4TqSw8E4kPnfDMJl2NAzcxtnB96m+\nVg6vg5YRIbu1dmpkt3igfnAFj6G2bCvwgoxuWFz/ydWOYgsXHkW+X4uBAoGAD7GX\nSfDaU23dduEWDyFT4t+unq49h9HskGirUh/DrPy25Cf4kNiPS1uqfIFQQJpZYp05\nTDpWIzLXNgEM5jYCep7RZElJy3m7mX/nVUE84SrJ5l+PURdwtAy4qgNEGDdJUO1/\noxTU4UgyNJnA3IQ+BXpki+RJhtcOIASAdoo4E7ECgYAru8c63MU6HBs4J4KnQAj8\n9zcswUZwGmwdJxGZFLSbnA8pnyCXDdQjOPCR0a0vzsevl4R6yJcOTn+WaTeqkLC3\nh0+Ob0mDiH15sVNCKyB87FpFWSSjIfVfKU7ZEBg/9B++P9qb0QsTyDl7gSslgMP9\nbBV148CPsBRbbrRM/IwgIw==\n-----END PRIVATE KEY-----\n",
+    "client_email": "carfire-sheets@carfire-auto.iam.gserviceaccount.com",
+    "client_id": "117620997756338360909",
+    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+    "token_uri": "https://oauth2.googleapis.com/token",
+    "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+    "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/carfire-sheets%40carfire-auto.iam.gserviceaccount.com",
+    "universe_domain": "googleapis.com"
+}
+
 
 def save_lead_to_sheets(profile: dict):
     try:
-        creds_json = os.environ.get("GOOGLE_CREDENTIALS_JSON")
-        sheet_id = os.environ.get("SPREADSHEET_ID")
-        logging.info(f"Sheets debug: creds present={bool(creds_json)}, sheet_id={sheet_id}")
-        if not creds_json or not sheet_id:
-            logging.warning("Sheets отключён — нет переменных")
-            return
-        creds_dict = json.loads(creds_json)
         scopes = [
             "https://www.googleapis.com/auth/spreadsheets",
             "https://www.googleapis.com/auth/drive",
         ]
-        creds = Credentials.from_service_account_info(creds_dict, scopes=scopes)
+        creds = Credentials.from_service_account_info(GOOGLE_CREDS, scopes=scopes)
         gc = gspread.authorize(creds)
-        sheet = gc.open_by_key(sheet_id).sheet1
+        sheet = gc.open_by_key(SPREADSHEET_ID).sheet1
         row = [
             datetime.now().strftime("%d.%m.%Y %H:%M"),
             profile.get("name", "—"),
@@ -119,6 +128,7 @@ def main_keyboard():
         [KeyboardButton("⚡ Авто до 160 л.с."), KeyboardButton("🇨🇳 Китай vs 🇺🇸 США")],
         [KeyboardButton("📞 Связаться с менеджером")],
     ], resize_keyboard=True)
+
 
 def phone_keyboard():
     return ReplyKeyboardMarkup(
@@ -207,7 +217,6 @@ async def get_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def get_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
     name = context.user_data.get("name", "")
-
     if update.message.contact:
         phone = update.message.contact.phone_number
     elif update.message.text:
@@ -236,11 +245,9 @@ async def get_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def get_car(update: Update, context: ContextTypes.DEFAULT_TYPE):
     car = update.message.text.strip()
     context.user_data["car"] = car
-
     await notify_managers(context.bot, context.user_data)
     save_lead_to_sheets(context.user_data)
     logging.info(f"Лид: {context.user_data}")
-
     name = context.user_data.get("name", "")
     await update.message.reply_text(
         f"Принял, {name}! 👍\n\n"
@@ -302,7 +309,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "Что-то пошло не так. Напиши менеджеру: @superluxxx",
             reply_markup=main_keyboard()
         )
-
     return CHAT
 
 
@@ -330,6 +336,7 @@ def main():
     app.add_handler(conv)
     logging.info("Бот запущен!")
     app.run_polling()
+
 
 if __name__ == "__main__":
     main()
