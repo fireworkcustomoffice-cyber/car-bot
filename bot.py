@@ -1,15 +1,11 @@
 import os
 import logging
-from datetime import datetime
-from telegram import Update, ReplyKeyboardMarkup, KeyboardButton, Bot
+from telegram import Update, ReplyKeyboardMarkup, KeyboardButton, Bot, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import (
     Application, MessageHandler, CommandHandler,
-    filters, ContextTypes, ConversationHandler,
+    filters, ContextTypes, ConversationHandler, CallbackQueryHandler,
 )
 from groq import Groq
-import gspread
-from google.oauth2.service_account import Credentials
-import json
 
 logging.basicConfig(format="%(asctime)s | %(levelname)s | %(message)s", level=logging.INFO)
 
@@ -20,8 +16,8 @@ MANAGER_IDS = [7328478138, 295158168]
 SYSTEM_PROMPT = """Ты — Игорь, AI-ассистент компании CARFIRE. Помогаем пригнать автомобиль из-за рубежа.
 
 О компании CARFIRE:
-— Привозим автомобили из Китая, США и других стран (Европа, Япония, Корея, Канада — по запросу)
-— Работаем с любыми марками, чаще всего немецкие и японские
+— Привозим автомобили из Китая, США, Европы, Японии и Кореи
+— Работаем с любыми марками
 — Популярны авто до 160 л.с. — они выгоднее по налогу
 
 Китай:
@@ -33,9 +29,11 @@ SYSTEM_PROMPT = """Ты — Игорь, AI-ассистент компании C
 США:
 — Работаем с аукционами (Copart, IAAI) и обычными авто
 — Берём авто с небольшими повреждениями — восстановление включено в стоимость
-— Клиент получает отличный автомобиль по выгодной цене
-— Популярны немецкие и японские марки
 — Сроки: 6–10 недель
+
+Европа, Япония, Корея:
+— Подбор по запросу
+— Сроки и условия — индивидуально
 
 Как работаем:
 — Клиент оставляет заявку
@@ -49,6 +47,7 @@ SYSTEM_PROMPT = """Ты — Игорь, AI-ассистент компании C
 — Можно сказать что стоимость зависит от марки, модели, года, мощности и курса
 
 Менеджер Евгений: @superluxxx
+Сайт: carfire-import.ru
 
 Стиль: живой, дружелюбный, уверенный. Без воды. Как опытный консультант. Иногда обращайся по имени.
 
@@ -65,43 +64,6 @@ client = Groq(api_key=GROQ_API_KEY)
 user_histories = {}
 
 GET_NAME, GET_PHONE, GET_CAR, CHAT = range(4)
-
-SPREADSHEET_ID = "1ChQu78k-1b8wBWew1izazOpHDaq5N8HuFADLbHtMW_g"
-
-GOOGLE_CREDS = {
-    "type": "service_account",
-    "project_id": "carfire-auto",
-    "private_key_id": "e126ad65364b49501ce51a4f2403d497604c142e",
-    "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQDhxoSs+ciHISd8\n8NTdkW/xl4fJQVO2+JoMLXxfQzaUZRkiQuYl5qwrxttiNnLGZJE4B0dzjtTKDw/7\nE9n16shj/r1eKxdZxCfhrr4dgqyLdbSGv3B9hyc1zvoFO94KfXYgMbdeUufPNZZy\njk0iFYM9aFvhkvHK1oTJXhNZwWD5EvWipMyQYBcMoppXNJrqlFAIcNmaeDIpuA25\n8ySb4m2gpUBT7dauaeo1YaRwgfhLj2L2vdMPnzvp/05GjXCddqKZCmciPkUyeaHq\n7wuhX/NaLAUaM0LsWkdaTKFe1bpstwfYerj1QpV76BofPkNkEZFks6bv46sek1sh\nlj7pauAjAgMBAAECggEAOSI8A+vn125H6GGndHRv8CKo/YB3F1fc39UI4rCHGNFm\npVlplVDE5AUcEkP2EodzikqpRbBw37slD6QL5aPm1wspT7G25IPzlbRbLuuZD2eX\nafv7EwEHJqI8eeOXAm+SW35JSWjQeYq1ikLBeS0Ze4ozqic94dccXjrcybtad1zf\noXSimNluj9VZeP1paY/0g4rZsKAD+lOFwhAGFudM6A2gW1VGVg/7A7yYdd8cynkY\nK7KGFkCRltbOabIq6uoZNOcW1GFkou57kVQN4A7lTK/QOTsJBKjypycvb8o6mf76\nYFKSVB7TgZQZwRJlNAz5aROwotXesWc7J9H25vnekQKBgQD5q6vcNknhKqyWkLjS\ntgcavJHDksttC41of7rt6i8A9fXHcjXg9xdQHCOblKpdB2u+tXgau1httJ+IwpNU\nAuXwR+9GusU+mFVAk0gT1oJwCl0QTheoCzcS3jUe2TwATV0w+/LZOBgolSnYqCxZ\naoetWj1UIY7UAPBHLGyTPQjmEQKBgQDnf8VP4OHOaQ8h3N4ehjvX5H96nqT9FXfk\n4nQKp/Rl4IqesWy6uMq7cefUIyPzcY3TB5G3HPtpCq3xm9UOPT0CA21MDNwCb+RE\nM7Mc7hIjBSRralLooMjx//j/v2QE0HSvRVutl3/O6BeaOk2vnpIqRjquzAn/eB/m\nrNHT+lqe8wKBgATUoXqdQkis/rHbEvhgtTp7M4bJLE5rzsyazA8WXNpz59F4EDrO\nDRFrufSkp7ctEZSbBjveLBPTTtLikN8rPy+q9KI1suNHJz8cmmRn3hY03SAXorWJ\nogMncXerVFHdLVRpS4WQZEdEu46JknIYcY+VE2KxU4YejoeSAHfI0odBAoGAQE9Q\nYvZYBF1PJNsUoWos6bbCay/zKZNzMRRvpB4wWLTeDWPAjsaTGytzeY0hiZl8CqnJ\noxLcDLw4wivGLiR49Dw7eqr/23V19jReh6TjSPM+wNBSo+k2qXOwmmtyv5uhLqeX\n5kt15+a119RmjGkCtde4qaJpDJ00T4Km77pWvl0CgYBvpiy9MUbh/jkkE5LL+z2T\nNd75Lzp2jdCn9qYHxJUy3CZc5PPuXdy3UHQKTFEUQPAmvBmAT/hPEdBvYq54pd6v\niYm19kNGI48ix8aGa/r950qZS8XlryPqDK2e5g6xPyetvUQKiNn/MxiCWHXNf67j\nAI8r0qDHkKRHCNqXAq4EXw==\n-----END PRIVATE KEY-----\n",
-    "client_email": "carfire-sheets@carfire-auto.iam.gserviceaccount.com",
-    "client_id": "117620997756338360909",
-    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-    "token_uri": "https://oauth2.googleapis.com/token",
-    "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-    "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/carfire-sheets%40carfire-auto.iam.gserviceaccount.com",
-    "universe_domain": "googleapis.com"
-}
-
-def save_lead_to_sheets(profile: dict):
-    try:
-        scopes = [
-            "https://www.googleapis.com/auth/spreadsheets",
-            "https://www.googleapis.com/auth/drive",
-        ]
-        creds = Credentials.from_service_account_info(GOOGLE_CREDS, scopes=scopes)
-        gc = gspread.authorize(creds)
-        sheet = gc.open_by_key(SPREADSHEET_ID).sheet1
-        row = [
-            datetime.now().strftime("%d.%m.%Y %H:%M"),
-            profile.get("name", "—"),
-            profile.get("phone", "—"),
-            profile.get("car", "—"),
-            "Новый",
-        ]
-        sheet.append_row(row)
-        logging.info(f"✅ Лид записан в Sheets: {row}")
-    except Exception as e:
-        logging.error(f"❌ Ошибка Sheets: {e}")
 
 
 async def notify_managers(bot: Bot, profile: dict):
@@ -122,12 +84,11 @@ async def notify_managers(bot: Bot, profile: dict):
 
 def main_keyboard():
     return ReplyKeyboardMarkup([
-        [KeyboardButton("🚗 Оставить заявку"), KeyboardButton("🌍 Откуда привозите?")],
+        [KeyboardButton("🚗 Оставить заявку"), KeyboardButton("🌍 Страны и условия")],
         [KeyboardButton("⏱ Сроки доставки"), KeyboardButton("❓ Как это работает?")],
-        [KeyboardButton("⚡ Авто до 160 л.с."), KeyboardButton("🇨🇳 Китай vs 🇺🇸 США")],
+        [KeyboardButton("⚡ Авто до 160 л.с."), KeyboardButton("🌐 Наш сайт")],
         [KeyboardButton("📞 Связаться с менеджером")],
     ], resize_keyboard=True)
-
 
 def phone_keyboard():
     return ReplyKeyboardMarkup(
@@ -135,20 +96,23 @@ def phone_keyboard():
         resize_keyboard=True
     )
 
-
 QUICK_ANSWERS = {
-    "🌍 Откуда привозите?": (
-        "Основные направления:\n\n"
-        "🇨🇳 Китай — новые и б/у авто, высокая комплектация, площадка che168.com\n"
-        "🇺🇸 США — аукционы Copart и IAAI, а также обычный рынок\n\n"
-        "По запросу: Европа, Япония, Корея, Канада.\n\n"
-        "Привозим любые марки — чаще всего немецкие и японские."
+    "🌍 Страны и условия": (
+        "Откуда привозим автомобили:\n\n"
+        "🇨🇳 Китай — новые и б/у авто, высокая комплектация, площадка che168.com, 3–6 недель\n\n"
+        "🇺🇸 США — аукционы Copart и IAAI, авто с повреждениями восстанавливаем, 6–10 недель\n\n"
+        "🇪🇺 Европа — подбор по запросу, сроки индивидуально\n\n"
+        "🇯🇵 Япония — подбор по запросу, сроки индивидуально\n\n"
+        "🇰🇷 Корея — подбор по запросу, сроки индивидуально\n\n"
+        "Привозим любые марки. Менеджер подберёт лучший вариант под твой запрос и бюджет."
     ),
     "⏱ Сроки доставки": (
         "Сроки доставки:\n\n"
         "🇨🇳 Китай — 3–6 недель\n"
         "🇺🇸 США — 6–10 недель\n"
-        "🌍 Европа, Япония, Корея — индивидуально\n\n"
+        "🇪🇺 Европа — индивидуально\n"
+        "🇯🇵 Япония — индивидуально\n"
+        "🇰🇷 Корея — индивидуально\n\n"
         "Точные сроки зависят от конкретного авто и маршрута. "
         "Менеджер скажет точнее под твой запрос."
     ),
@@ -171,21 +135,6 @@ QUICK_ANSWERS = {
         "Привозим любые марки до 160 л.с. — кроссоверы, седаны, хэтчбеки. "
         "Оставь заявку — подберём варианты под твой бюджет."
     ),
-    "🇨🇳 Китай vs 🇺🇸 США": (
-        "Китай vs США — в чём разница?\n\n"
-        "🇨🇳 Китай:\n"
-        "— Новые и б/у авто\n"
-        "— Высокая комплектация\n"
-        "— Быстрее (3–6 недель)\n"
-        "— Популярен для авто до 160 л.с.\n\n"
-        "🇺🇸 США:\n"
-        "— Аукционы и обычный рынок\n"
-        "— Авто с повреждениями восстанавливаем — клиент получает отличную машину по выгодной цене\n"
-        "— Хорошо для немецких и японских марок\n"
-        "— Дольше (6–10 недель)\n\n"
-        "Что лучше именно для тебя — зависит от бюджета и модели. "
-        "Менеджер подскажет!"
-    ),
 }
 
 
@@ -194,7 +143,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_histories[update.effective_user.id] = []
     await update.message.reply_text(
         "Привет! Я Игорь — AI-ассистент компании CARFIRE 🔥\n\n"
-        "Помогаем пригнать авто из Китая, США и других стран.\n\n"
+        "Помогаем пригнать авто из Китая, США, Европы, Японии и Кореи.\n\n"
         "Как тебя зовут?",
         reply_markup=ReplyKeyboardMarkup([[]], resize_keyboard=True)
     )
@@ -207,8 +156,7 @@ async def get_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["username"] = update.effective_user.username or ""
     context.user_data["tg_id"] = update.effective_user.id
     await update.message.reply_text(
-        f"{name}, приятно! 🤝\n\n"
-        f"Оставь номер телефона — менеджер сможет связаться с тобой.",
+        f"{name}, приятно! 🤝\n\nОставь номер телефона — менеджер сможет связаться с тобой.",
         reply_markup=phone_keyboard()
     )
     return GET_PHONE
@@ -223,19 +171,14 @@ async def get_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if len(digits) >= 10:
             phone = update.message.text.strip()
         else:
-            await update.message.reply_text(
-                f"{name}, нажми кнопку или напиши номер 👇",
-                reply_markup=phone_keyboard()
-            )
+            await update.message.reply_text(f"{name}, нажми кнопку или напиши номер 👇", reply_markup=phone_keyboard())
             return GET_PHONE
     else:
         await update.message.reply_text("Нажми кнопку ниже 👇", reply_markup=phone_keyboard())
         return GET_PHONE
-
     context.user_data["phone"] = phone
     await update.message.reply_text(
-        f"Отлично! Теперь скажи — какой автомобиль тебя интересует?\n\n"
-        f"Напиши марку, модель, примерный бюджет или просто что ищешь.",
+        f"Отлично! Теперь скажи — какой автомобиль тебя интересует?\n\nНапиши марку, модель, примерный бюджет или просто что ищешь.",
         reply_markup=ReplyKeyboardMarkup([[]], resize_keyboard=True)
     )
     return GET_CAR
@@ -245,13 +188,10 @@ async def get_car(update: Update, context: ContextTypes.DEFAULT_TYPE):
     car = update.message.text.strip()
     context.user_data["car"] = car
     await notify_managers(context.bot, context.user_data)
-    save_lead_to_sheets(context.user_data)
     logging.info(f"Лид: {context.user_data}")
     name = context.user_data.get("name", "")
     await update.message.reply_text(
-        f"Принял, {name}! 👍\n\n"
-        f"Менеджер Евгений свяжется с тобой в ближайшее время и подберёт варианты.\n\n"
-        f"Пока можешь узнать больше о нас 👇",
+        f"Принял, {name}! 👍\n\nМенеджер Евгений свяжется с тобой в ближайшее время и подберёт варианты.\n\nПока можешь узнать больше о нас 👇",
         reply_markup=main_keyboard()
     )
     return CHAT
@@ -263,16 +203,21 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if user_text == "📞 Связаться с менеджером":
         await update.message.reply_text(
-            "Менеджер Евгений:\nTelegram: @superluxxx\n\n"
-            "Напиши ему напрямую — он поможет с подбором и расчётом.",
+            "Менеджер Евгений:\nTelegram: @superluxxx\n\nНапиши ему напрямую — он поможет с подбором и расчётом.",
             reply_markup=main_keyboard()
         )
         return CHAT
 
     if user_text == "🚗 Оставить заявку":
         await update.message.reply_text(
-            "Напиши какой автомобиль тебя интересует — марку, модель, бюджет или страну.\n"
-            "Менеджер свяжется и сделает подбор под твой запрос.",
+            "Напиши какой автомобиль тебя интересует — марку, модель, бюджет или страну.\nМенеджер свяжется и сделает подбор под твой запрос.",
+            reply_markup=main_keyboard()
+        )
+        return CHAT
+
+    if user_text == "🌐 Наш сайт":
+        await update.message.reply_text(
+            "Наш сайт: https://carfire-import.ru\n\nТам найдёшь подробную информацию о компании и услугах.",
             reply_markup=main_keyboard()
         )
         return CHAT
@@ -304,19 +249,14 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(reply, reply_markup=main_keyboard())
     except Exception as e:
         logging.exception(f"Ошибка: {e}")
-        await update.message.reply_text(
-            "Что-то пошло не так. Напиши менеджеру: @superluxxx",
-            reply_markup=main_keyboard()
-        )
+        await update.message.reply_text("Что-то пошло не так. Напиши менеджеру: @superluxxx", reply_markup=main_keyboard())
+
     return CHAT
 
 
 def main():
-    if not TELEGRAM_TOKEN:
-        raise ValueError("Нет TELEGRAM_TOKEN")
-    if not GROQ_API_KEY:
-        raise ValueError("Нет GROQ_API_KEY")
-
+    if not TELEGRAM_TOKEN: raise ValueError("Нет TELEGRAM_TOKEN")
+    if not GROQ_API_KEY: raise ValueError("Нет GROQ_API_KEY")
     app = Application.builder().token(TELEGRAM_TOKEN).build()
     conv = ConversationHandler(
         entry_points=[CommandHandler("start", start)],
@@ -335,7 +275,6 @@ def main():
     app.add_handler(conv)
     logging.info("Бот запущен!")
     app.run_polling()
-
 
 if __name__ == "__main__":
     main()
