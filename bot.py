@@ -1,9 +1,9 @@
 import os
 import logging
-from telegram import Update, ReplyKeyboardMarkup, KeyboardButton, Bot, InlineKeyboardMarkup, InlineKeyboardButton
+from telegram import Update, ReplyKeyboardMarkup, KeyboardButton, Bot, ReplyKeyboardRemove
 from telegram.ext import (
     Application, MessageHandler, CommandHandler,
-    filters, ContextTypes, ConversationHandler, CallbackQueryHandler,
+    filters, ContextTypes, ConversationHandler,
 )
 from groq import Groq
 
@@ -145,7 +145,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "Привет! Я Игорь — AI-ассистент компании CARFIRE 🔥\n\n"
         "Помогаем пригнать авто из Китая, США, Европы, Японии и Кореи.\n\n"
         "Как тебя зовут?",
-        reply_markup=ReplyKeyboardMarkup([[]], resize_keyboard=True)
+        reply_markup=ReplyKeyboardRemove()
     )
     return GET_NAME
 
@@ -171,15 +171,19 @@ async def get_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if len(digits) >= 10:
             phone = update.message.text.strip()
         else:
-            await update.message.reply_text(f"{name}, нажми кнопку или напиши номер 👇", reply_markup=phone_keyboard())
+            await update.message.reply_text(
+                f"{name}, нажми кнопку или напиши номер 👇",
+                reply_markup=phone_keyboard()
+            )
             return GET_PHONE
     else:
         await update.message.reply_text("Нажми кнопку ниже 👇", reply_markup=phone_keyboard())
         return GET_PHONE
+
     context.user_data["phone"] = phone
     await update.message.reply_text(
-        f"Отлично! Теперь скажи — какой автомобиль тебя интересует?\n\nНапиши марку, модель, примерный бюджет или просто что ищешь.",
-        reply_markup=ReplyKeyboardMarkup([[]], resize_keyboard=True)
+        "Отлично! Теперь скажи — какой автомобиль тебя интересует?\n\nНапиши марку, модель, примерный бюджет или просто что ищешь.",
+        reply_markup=ReplyKeyboardRemove()
     )
     return GET_CAR
 
